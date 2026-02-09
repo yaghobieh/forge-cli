@@ -1,0 +1,67 @@
+{
+  "name": "create-forge",
+  "version": "1.0.0",
+  "description": "CLI to create and manage ForgeStack projects - React apps with optional server, state management, and UI components",
+  "type": "module",
+  "bin": {
+    "create-forge": "./dist/index.js",
+    "forge": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "start": "node dist/index.js",
+    "test": "node dist/index.js create my-app --template react",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "cli",
+    "react",
+    "forge",
+    "forgestack",
+    "scaffold",
+    "create-app",
+    "bear-ui",
+    "synapse",
+    "state-management",
+    "harbor",
+    "backend",
+    "express"
+  ],
+  "author": "ForgeStack",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yaghobieh/forge-cli"
+  },
+  "homepage": "https://forgedevstack.com",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "enquirer": "^2.4.1",
+    "execa": "^9.5.2",
+    "fs-extra": "^11.2.0",
+    "gradient-string": "^3.0.0",
+    "ora": "^8.1.1",
+    "picocolors": "^1.1.1",
+    "validate-npm-package-name": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/gradient-string": "^1.1.6",
+    "@types/node": "^22.10.5",
+    "@types/validate-npm-package-name": "^4.0.2",
+    "tsup": "^8.5.1",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

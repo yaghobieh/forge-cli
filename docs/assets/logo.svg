@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="forgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899"/>
+      <stop offset="50%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#3b82f6"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <circle cx="100" cy="100" r="90" fill="#09090b"/>
+  <circle cx="100" cy="100" r="90" fill="none" stroke="url(#forgeGradient)" stroke-width="2" opacity="0.5"/>
+  
+  <!-- Terminal window -->
+  <g filter="url(#glow)">
+    <rect x="35" y="50" width="130" height="90" rx="8" fill="#18181b" stroke="url(#forgeGradient)" stroke-width="1.5"/>
+    
+    <!-- Title bar dots -->
+    <circle cx="50" cy="62" r="4" fill="#ef4444"/>
+    <circle cx="65" cy="62" r="4" fill="#eab308"/>
+    <circle cx="80" cy="62" r="4" fill="#22c55e"/>
+    
+    <!-- Terminal content -->
+    <text x="45" y="90" font-family="monospace" font-size="11" fill="#ec4899">$</text>
+    <text x="55" y="90" font-family="monospace" font-size="11" fill="#a1a1aa">npx create-forge</text>
+    
+    <text x="45" y="108" font-family="monospace" font-size="10" fill="#22c55e">✓</text>
+    <text x="58" y="108" font-family="monospace" font-size="10" fill="#71717a">Project created</text>
+    
+    <text x="45" y="124" font-family="monospace" font-size="11" fill="#ec4899">$</text>
+    <rect x="55" y="115" width="8" height="12" fill="#ec4899" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;0;0.8" dur="1s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+  
+  <!-- Forge text -->
+  <text x="100" y="165" font-family="system-ui, sans-serif" font-size="16" font-weight="bold" fill="url(#forgeGradient)" text-anchor="middle">FORGE CLI</text>
+</svg>
