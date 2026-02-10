@@ -15,15 +15,15 @@ import type { PackageManager } from '../ui/prompts.js';
 import { generateSynapseNuclear } from '../templates/synapse.js';
 
 const FORGE_PACKAGES = {
-  bear: '@forgedevstack/bear@^1.0.7',
-  'grid-table': '@forgedevstack/grid-table',
-  'forge-query': '@forgedevstack/forge-query',
-  'forge-form': '@forgedevstack/forge-form',
-  'forge-compass': '@forgedevstack/forge-compass',
-  synapse: '@forgedevstack/synapse',
-  anvil: '@forgedevstack/anvil',
-  harbor: '@forgedevstack/harbor',
-  kiln: '@forgedevstack/kiln',
+  bear: '@forgedevstack/bear@^1.0.8',
+  'grid-table': '@forgedevstack/grid-table@^0.2.0',
+  'forge-query': '@forgedevstack/forge-query@^1.0.0',
+  'forge-form': '@forgedevstack/forge-form@^1.0.0',
+  'forge-compass': '@forgedevstack/forge-compass@^1.2.1',
+  synapse: '@forgedevstack/synapse@^1.0.0',
+  anvil: '@forgedevstack/anvil@^1.0.1',
+  harbor: '@forgedevstack/harbor@^1.5.0',
+  kiln: '@forgedevstack/kiln@^0.1.0',
 } as const;
 
 type ForgePackage = keyof typeof FORGE_PACKAGES;
@@ -76,7 +76,7 @@ export const addCommand = async (
         { name: 'forge-compass' as const, message: `${accent('🧭 Forge Compass')} ${muted('- Routing')}` },
         { name: 'synapse' as const, message: `${accent('⚡ Synapse')} ${muted('- State management')}` },
         { name: 'anvil' as const, message: `${accent('🔨 Anvil')} ${muted('- Utilities & hooks')}` },
-        { name: 'harbor' as const, message: `${accent('⚓ Harbor')} ${muted('- API client')}` },
+        { name: 'harbor' as const, message: `${accent('⚓ Harbor')} ${muted('- Backend framework')}` },
         { name: 'kiln' as const, message: `${accent('🔥 Kiln')} ${muted('- Build tools')}` },
       ],
     });

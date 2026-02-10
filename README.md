@@ -9,27 +9,38 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/create-forge"><img src="https://img.shields.io/npm/v/create-forge.svg?style=flat-square&color=ec4899" alt="npm version" /></a>
-  <a href="https://www.npmjs.com/package/create-forge"><img src="https://img.shields.io/npm/dm/create-forge.svg?style=flat-square&color=8b5cf6" alt="npm downloads" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/npm/l/create-forge.svg?style=flat-square" alt="license" /></a>
+  <a href="https://www.npmjs.com/package/@forgedevstack/forge-cli"><img src="https://img.shields.io/npm/v/@forgedevstack/forge-cli.svg?style=flat-square&color=ec4899" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/@forgedevstack/forge-cli"><img src="https://img.shields.io/npm/dm/@forgedevstack/forge-cli.svg?style=flat-square&color=8b5cf6" alt="npm downloads" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/npm/l/@forgedevstack/forge-cli.svg?style=flat-square" alt="license" /></a>
 </p>
 
 ---
 
 ## Quick Start
 
+The CLI is published as `@forgedevstack/forge-cli`. Use it with npx, pnpm, yarn, or bun:
+
 ```bash
-# With npx
-npx create-forge my-app
+# With npx (no install)
+npx @forgedevstack/forge-cli create my-app
 
 # With pnpm
-pnpm create forge my-app
+pnpm dlx @forgedevstack/forge-cli create my-app
 
-# With yarn
-yarn create forge my-app
+# With yarn (v2+)
+yarn dlx @forgedevstack/forge-cli create my-app
 
 # With bun
-bunx create-forge my-app
+bunx @forgedevstack/forge-cli create my-app
+```
+
+Install globally to use the `forge` or `create-forge` commands from anywhere:
+
+```bash
+npm install -g @forgedevstack/forge-cli
+forge create my-app
+# or
+create-forge my-app
 ```
 
 ## Features
@@ -175,23 +186,23 @@ npm run docker:compose
 ### Create with All Options
 
 ```bash
-npx create-forge my-app --template react --package-manager pnpm --yes
+npx @forgedevstack/forge-cli create my-app --template react --package-manager pnpm --yes
 ```
 
 ### Custom Output Directory
 
 ```bash
-npx create-forge my-app --out-dir ./projects/my-app
+npx @forgedevstack/forge-cli create my-app --out-dir ./projects/my-app
 ```
 
 ### Add Packages to Existing Project
 
 ```bash
 cd my-project
-npx forge add bear --color "#3b82f6"
-npx forge add synapse
-npx forge nuclear user
-npx forge nuclear cart
+npx @forgedevstack/forge-cli add bear --color "#3b82f6"
+npx @forgedevstack/forge-cli add synapse
+npx @forgedevstack/forge-cli nuclear user
+npx @forgedevstack/forge-cli nuclear cart
 ```
 
 ## ForgeStack Packages

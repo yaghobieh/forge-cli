@@ -197,13 +197,13 @@ export const createCommand = async (
 
     // Add ForgeStack packages
     const forgePackages: string[] = [];
-    if (config.includeBear) forgePackages.push('@forgedevstack/bear@^1.0.7');
-    if (config.includeGridTable) forgePackages.push('@forgedevstack/grid-table');
-    if (config.includeForgeQuery || config.apiClient === 'forge-query') forgePackages.push('@forgedevstack/forge-query');
-    if (config.includeForgeForm) forgePackages.push('@forgedevstack/forge-form');
-    if (config.router === 'compass') forgePackages.push('@forgedevstack/forge-compass');
+    if (config.includeBear) forgePackages.push('@forgedevstack/bear@^1.0.8');
+    if (config.includeGridTable) forgePackages.push('@forgedevstack/grid-table@^0.2.0');
+    if (config.includeForgeQuery || config.apiClient === 'forge-query') forgePackages.push('@forgedevstack/forge-query@^1.0.0');
+    if (config.includeForgeForm) forgePackages.push('@forgedevstack/forge-form@^1.0.0');
+    if (config.router === 'compass') forgePackages.push('@forgedevstack/forge-compass@^1.2.1');
     if (config.router === 'react-router') forgePackages.push('react-router-dom');
-    if (config.stateManager === 'synapse') forgePackages.push('@forgedevstack/synapse');
+    if (config.stateManager === 'synapse') forgePackages.push('@forgedevstack/synapse@^1.0.0');
     // Note: Harbor is added in server template's package.json directly
 
     if (forgePackages.length > 0) {
@@ -265,7 +265,7 @@ const printForgeStackPackages = (config: ProjectConfig): void => {
 
   // Core packages based on config
   if (config.includeBear) {
-    packages.push({ name: 'Bear UI', package: '@forgedevstack/bear', version: '^1.0.7', included: true });
+    packages.push({ name: 'Bear UI', package: '@forgedevstack/bear', version: '^1.0.8', included: true });
   }
   if (config.stateManager === 'synapse') {
     packages.push({ name: 'Synapse', package: '@forgedevstack/synapse', version: '^1.0.0', included: true });
@@ -280,15 +280,15 @@ const printForgeStackPackages = (config: ProjectConfig): void => {
     packages.push({ name: 'Forge Query', package: '@forgedevstack/forge-query', version: '^1.0.0', included: true });
   }
   if (config.includeGridTable) {
-    packages.push({ name: 'Grid Table', package: '@forgedevstack/grid-table', version: '^1.0.0', included: true });
+    packages.push({ name: 'Grid Table', package: '@forgedevstack/grid-table', version: '^0.2.0', included: true });
   }
   // Anvil is always included
-  packages.push({ name: 'Anvil', package: '@forgedevstack/anvil', version: '^1.0.0', included: true });
+  packages.push({ name: 'Anvil', package: '@forgedevstack/anvil', version: '^1.0.1', included: true });
   
   // Server packages
   if (config.type === 'server' || config.type === 'fullstack') {
     if (config.serverFramework === 'harbor') {
-      packages.push({ name: 'Harbor', package: '@forgestack/harbor', version: '^1.0.0', included: true });
+      packages.push({ name: 'Harbor', package: '@forgedevstack/harbor', version: '^1.5.0', included: true });
     }
   }
 

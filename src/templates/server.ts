@@ -292,12 +292,12 @@ const generateHarborTemplate = async (
       build: 'tsc',
       start: 'node dist/index.js',
       lint: 'eslint . --ext ts --report-unused-disable-directives --max-warnings 0',
-      'generate:model': 'npx @forgestack/harbor generate model',
-      'generate:controller': 'npx @forgestack/harbor generate controller',
-      'generate:route': 'npx @forgestack/harbor generate route',
+      'generate:model': 'npx @forgedevstack/harbor generate model',
+      'generate:controller': 'npx @forgedevstack/harbor generate controller',
+      'generate:route': 'npx @forgedevstack/harbor generate route',
     },
     dependencies: {
-      '@forgestack/harbor': '^1.0.0',
+      '@forgedevstack/harbor': '^1.5.0',
       dotenv: '^16.4.7',
     },
     devDependencies: {
@@ -376,7 +376,7 @@ const generateHarborTemplate = async (
   );
 
   // src/index.ts
-  const indexTs = `import { createServer, connect, httpLogger } from '@forgestack/harbor';
+  const indexTs = `import { createServer, connect, httpLogger } from '@forgedevstack/harbor';
 import { userRoutes } from './routes/index.js';
 import { config } from './constants/config.js';
 
@@ -453,7 +453,7 @@ export const config = {
   );
 
   // src/routes/user.routes.ts
-  const userRoutes = `import { router, GET, POST, PUT, DELETE } from '@forgestack/harbor';
+  const userRoutes = `import { router, GET, POST, PUT, DELETE } from '@forgedevstack/harbor';
 import { UserController } from '../controllers/index.js';
 
 // Create user routes with Harbor's clean API
@@ -491,7 +491,7 @@ export const userRoutes = router('/api/users', [
   );
 
   // src/controllers/user.controller.ts
-  const userController = `import type { HarborRequest } from '@forgestack/harbor';
+  const userController = `import type { HarborRequest } from '@forgedevstack/harbor';
 import { UserService } from '../services/index.js';
 
 export const UserController = {

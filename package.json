@@ -1,6 +1,6 @@
 {
-  "name": "create-forge",
-  "version": "1.0.0",
+  "name": "@forgedevstack/forge-cli",
+  "version": "1.0.1",
   "description": "CLI to create and manage ForgeStack projects - React apps with optional server, state management, and UI components",
   "type": "module",
   "bin": {
