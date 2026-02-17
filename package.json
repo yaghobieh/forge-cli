@@ -1,6 +1,6 @@
 {
   "name": "@forgedevstack/forge-cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "CLI to create and manage ForgeStack projects - React apps with optional server, state management, and UI components",
   "type": "module",
   "bin": {
@@ -11,9 +11,6 @@
     "dist",
     "templates"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -39,7 +36,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yaghobieh/forge-cli"
+    "url": "https://github.com/forgedevstack/create-forge"
   },
   "homepage": "https://forgedevstack.com",
   "dependencies": {

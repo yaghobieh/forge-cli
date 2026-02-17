@@ -30,7 +30,7 @@ import { generateReactTemplate } from '../templates/react.js';
 import { generateServerTemplate } from '../templates/server.js';
 import { generateFullStackTemplate } from '../templates/fullstack.js';
 
-const VERSION = '1.0.0-alpha';
+const VERSION = '1.0.1';
 
 interface CreateOptions {
   template?: ProjectType;
@@ -83,6 +83,9 @@ export const createCommand = async (
       includeGridTable: true,
       includeForgeQuery: true,
       includeForgeForm: true,
+      includeRelay: true,
+      includeCrucible: true,
+      includeAuth: true,
       packageManager: (options.packageManager as ProjectConfig['packageManager']) || 'npm',
       typescript: true,
       installDependencies: true,
@@ -96,7 +99,7 @@ export const createCommand = async (
     let router: ProjectConfig['router'] = 'none';
     let apiClient: ProjectConfig['apiClient'] = 'fetch';
     let serverFramework: ProjectConfig['serverFramework'] = 'express';
-    let packages = { bear: false, gridTable: false, forgeQuery: false, forgeForm: false };
+    let packages = { bear: false, gridTable: false, forgeQuery: false, forgeForm: false, relay: false, crucible: false, auth: false };
     let bearColor: string | undefined;
     
     if (type === 'server') {
@@ -138,6 +141,9 @@ export const createCommand = async (
       includeGridTable: packages.gridTable,
       includeForgeQuery: packages.forgeQuery,
       includeForgeForm: packages.forgeForm,
+      includeRelay: packages.relay,
+      includeCrucible: packages.crucible,
+      includeAuth: packages.auth,
       packageManager,
       bearPrimaryColor: bearColor,
       typescript: true,
@@ -197,13 +203,16 @@ export const createCommand = async (
 
     // Add ForgeStack packages
     const forgePackages: string[] = [];
-    if (config.includeBear) forgePackages.push('@forgedevstack/bear@^1.0.8');
-    if (config.includeGridTable) forgePackages.push('@forgedevstack/grid-table@^0.2.0');
-    if (config.includeForgeQuery || config.apiClient === 'forge-query') forgePackages.push('@forgedevstack/forge-query@^1.0.0');
-    if (config.includeForgeForm) forgePackages.push('@forgedevstack/forge-form@^1.0.0');
-    if (config.router === 'compass') forgePackages.push('@forgedevstack/forge-compass@^1.2.1');
+    if (config.includeBear) forgePackages.push('@forgedevstack/bear@^1.0.7');
+    if (config.includeGridTable) forgePackages.push('@forgedevstack/grid-table');
+    if (config.includeForgeQuery || config.apiClient === 'forge-query') forgePackages.push('@forgedevstack/forge-query');
+    if (config.includeForgeForm) forgePackages.push('@forgedevstack/forge-form');
+    if (config.includeRelay) forgePackages.push('@forgedevstack/relay');
+    if (config.includeAuth) forgePackages.push('@forgedevstack/forge-auth');
+    if (config.router === 'compass') forgePackages.push('@forgedevstack/forge-compass');
     if (config.router === 'react-router') forgePackages.push('react-router-dom');
-    if (config.stateManager === 'synapse') forgePackages.push('@forgedevstack/synapse@^1.0.0');
+    if (config.stateManager === 'synapse') forgePackages.push('@forgedevstack/synapse');
+    // Crucible is a devDependency — added separately below
     // Note: Harbor is added in server template's package.json directly
 
     if (forgePackages.length > 0) {
@@ -215,6 +224,18 @@ export const createCommand = async (
         spinnerSuccess(forgeSpinner, 'ForgeStack packages added');
       } catch {
         spinnerError(forgeSpinner, 'Failed to add ForgeStack packages');
+      }
+    }
+
+    // Crucible is a devDependency (testing library)
+    if (config.includeCrucible) {
+      const crucibleSpinner = createSpinner('Adding Crucible (testing)...');
+      crucibleSpinner.start();
+      try {
+        await addPackages(config.packageManager, ['@forgedevstack/crucible'], projectDir, true);
+        spinnerSuccess(crucibleSpinner, 'Crucible added as devDependency');
+      } catch {
+        spinnerError(crucibleSpinner, 'Failed to add Crucible');
       }
     }
   }
@@ -265,7 +286,7 @@ const printForgeStackPackages = (config: ProjectConfig): void => {
 
   // Core packages based on config
   if (config.includeBear) {
-    packages.push({ name: 'Bear UI', package: '@forgedevstack/bear', version: '^1.0.8', included: true });
+    packages.push({ name: 'Bear UI', package: '@forgedevstack/bear', version: '^1.0.7', included: true });
   }
   if (config.stateManager === 'synapse') {
     packages.push({ name: 'Synapse', package: '@forgedevstack/synapse', version: '^1.0.0', included: true });
@@ -280,15 +301,26 @@ const printForgeStackPackages = (config: ProjectConfig): void => {
     packages.push({ name: 'Forge Query', package: '@forgedevstack/forge-query', version: '^1.0.0', included: true });
   }
   if (config.includeGridTable) {
-    packages.push({ name: 'Grid Table', package: '@forgedevstack/grid-table', version: '^0.2.0', included: true });
+    packages.push({ name: 'Grid Table', package: '@forgedevstack/grid-table', version: '^1.0.0', included: true });
+  }
+  if (config.includeRelay) {
+    packages.push({ name: 'Relay', package: '@forgedevstack/relay', version: '^1.0.0', included: true });
+  }
+  if (config.includeAuth) {
+    packages.push({ name: 'Forge Auth', package: '@forgedevstack/forge-auth', version: '^1.0.0', included: true });
   }
   // Anvil is always included
-  packages.push({ name: 'Anvil', package: '@forgedevstack/anvil', version: '^1.0.1', included: true });
+  packages.push({ name: 'Anvil', package: '@forgedevstack/anvil', version: '^1.0.0', included: true });
   
+  // Testing (devDependency)
+  if (config.includeCrucible) {
+    packages.push({ name: 'Crucible', package: '@forgedevstack/crucible', version: '^1.0.0', included: true });
+  }
+
   // Server packages
   if (config.type === 'server' || config.type === 'fullstack') {
     if (config.serverFramework === 'harbor') {
-      packages.push({ name: 'Harbor', package: '@forgedevstack/harbor', version: '^1.5.0', included: true });
+      packages.push({ name: 'Harbor', package: '@forgedevstack/harbor', version: '^1.0.0', included: true });
     }
   }
 

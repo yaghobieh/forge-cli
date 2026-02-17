@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.0.1 (2026-02-16)
+
+### New Features
+
+- **Relay Support** - Added `@forgedevstack/relay` (HTTP client & WebSockets) to create and add commands
+- **Forge Auth Support** - Added `@forgedevstack/forge-auth` (Authentication & OAuth) to create and add commands
+- **Crucible Testing** - Added `@forgedevstack/crucible` (testing framework) with scope selection (client, server, both)
+- **Crucible as DevDependency** - Crucible is automatically installed as a devDependency when selected
+- **Crucible Scope Prompt** - Interactive prompt to choose testing scope: Frontend, Backend, or Both
+- **Auto-generated Test Setup** - `crucible.setup.ts` and `example.test.ts` generated based on chosen scope
+
+### Improvements
+
+- Package selection prompt now includes 8 ForgeStack packages (up from 5)
+- `--yes` flag now includes all new packages by default
+- Updated packages table to show Relay, Forge Auth, and Crucible
+- Added `--scope` option to `forge add crucible` for non-interactive usage
+
+---
+
+## 1.0.0-rc.2 (2026-02-08)
+
+### Fixes
+
+- Fixed multi-select packages using `enquirer.MultiSelect` directly for better control
+- Updated ForgeStack portal with improved mobile responsive design
+- Added more comprehensive CLI documentation to portal
+
+---
+
 ## 1.0.0-rc.1 (2026-02-08)
 
 ### New Features
@@ -81,7 +111,7 @@ First alpha release of Forge CLI.
 - [ ] Plugin system for custom templates
 - [ ] Project upgrade command
 - [ ] Workspace/Monorepo support
-- [ ] Test setup (Vitest, Playwright)
+- [x] Test setup (Crucible)
 - [ ] i18n integration
 - [ ] PWA support
 - [ ] SSR/SSG templates

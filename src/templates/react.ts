@@ -123,6 +123,18 @@ async function generatePackageJson(projectDir: string, config: ProjectConfig) {
     dependencies['@forgedevstack/synapse'] = versions.synapse;
   }
 
+  if (config.includeRelay) {
+    dependencies['@forgedevstack/relay'] = versions.relay;
+  }
+
+  if (config.includeAuth) {
+    dependencies['@forgedevstack/forge-auth'] = versions.forgeAuth;
+  }
+
+  if (config.includeCrucible) {
+    devDependencies['@forgedevstack/crucible'] = versions.crucible;
+  }
+
   const scripts: Record<string, string> = {
     dev: 'vite',
     build: 'tsc && vite build',
@@ -168,6 +180,9 @@ async function getLatestVersions(): Promise<Record<string, string>> {
     { name: 'forgeForm', pkg: '@forgedevstack/forge-form', fallback: '^1.0.0' },
     { name: 'gridTable', pkg: '@forgedevstack/grid-table', fallback: '^1.0.0' },
     { name: 'anvil', pkg: '@forgedevstack/anvil', fallback: '^1.0.0' },
+    { name: 'relay', pkg: '@forgedevstack/relay', fallback: '^1.0.0' },
+    { name: 'forgeAuth', pkg: '@forgedevstack/forge-auth', fallback: '^1.0.0' },
+    { name: 'crucible', pkg: '@forgedevstack/crucible', fallback: '^1.0.0' },
   ];
 
   const versions: Record<string, string> = {};

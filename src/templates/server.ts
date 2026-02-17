@@ -282,6 +282,17 @@ const generateHarborTemplate = async (
   await ensureDir(path.join(projectDir, 'src', 'types'));
 
   // package.json
+  const serverDevDeps: Record<string, string> = {
+    '@types/node': '^22.10.5',
+    tsx: '^4.19.2',
+    typescript: '^5.7.3',
+    eslint: '^9.18.0',
+  };
+
+  if (config.includeCrucible) {
+    serverDevDeps['@forgedevstack/crucible'] = '^1.0.0';
+  }
+
   const packageJson = {
     name: config.name,
     version: '0.1.0',
@@ -297,15 +308,10 @@ const generateHarborTemplate = async (
       'generate:route': 'npx @forgedevstack/harbor generate route',
     },
     dependencies: {
-      '@forgedevstack/harbor': '^1.5.0',
+      '@forgedevstack/harbor': '^1.0.0',
       dotenv: '^16.4.7',
     },
-    devDependencies: {
-      '@types/node': '^22.10.5',
-      tsx: '^4.19.2',
-      typescript: '^5.7.3',
-      eslint: '^9.18.0',
-    },
+    devDependencies: serverDevDeps,
   };
 
   await writeFile(

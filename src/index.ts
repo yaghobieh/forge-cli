@@ -26,6 +26,7 @@ program
   .description('Add a ForgeStack package to your project')
   .option('-c, --color <hex>', 'Bear UI primary color (for bear package)')
   .option('-n, --nuclear <name>', 'Create nuclear slice (for synapse package)')
+  .option('-s, --scope <scope>', 'Crucible testing scope (client, server, both)')
   .action(addCommand);
 
 // Nuclear command (Synapse slice generator)

@@ -22,6 +22,9 @@ export interface ProjectConfig {
   includeGridTable: boolean;
   includeForgeQuery: boolean;
   includeForgeForm: boolean;
+  includeRelay: boolean;
+  includeCrucible: boolean;
+  includeAuth: boolean;
   packageManager: PackageManager;
   bearPrimaryColor?: string;
   typescript: boolean;
@@ -120,25 +123,32 @@ export const promptForgePackages = async (): Promise<{
   gridTable: boolean;
   forgeQuery: boolean;
   forgeForm: boolean;
+  relay: boolean;
+  crucible: boolean;
+  auth: boolean;
 }> => {
-  // Using MultiSelect class directly for better control
-  const { MultiSelect } = enquirer as { MultiSelect: new (options: Record<string, unknown>) => { run: () => Promise<string[]> } };
-  
-  const multiselect = new MultiSelect({
+  const choices = [
+    { name: 'all', message: `${chalk.bold.hex(COLORS.accent)('⭐ ALL')} ${muted('- Include all ForgeStack packages')}` },
+    { name: 'bear', message: `${accent('🐻 Bear UI')} ${muted('- Component library + Theme')}` },
+    { name: 'grid-table', message: `${accent('📊 Grid Table')} ${muted('- Advanced data grid')}` },
+    { name: 'forge-query', message: `${accent('🔍 Forge Query')} ${muted('- Data fetching & caching')}` },
+    { name: 'forge-form', message: `${accent('📝 Forge Form')} ${muted('- Form state management')}` },
+    { name: 'relay', message: `${accent('📡 Relay')} ${muted('- HTTP client & WebSockets')}` },
+    { name: 'crucible', message: `${accent('🧪 Crucible')} ${muted('- Testing framework (client & server)')}` },
+    { name: 'forge-auth', message: `${accent('🔐 Forge Auth')} ${muted('- Authentication & OAuth')}` },
+  ];
+
+  // Use enquirer.prompt with type 'multiselect' for proper multi-select behavior
+  const response = await (prompt as (options: Record<string, unknown>) => Promise<Record<string, string[]>>)({
+    type: 'multiselect',
     name: 'packages',
     message: pink('Select ForgeStack packages:') + muted(' (↑↓ navigate, space select, a toggle all, enter confirm)'),
-    hint: '(Use <space> to select, <a> to toggle all)',
-    choices: [
-      { name: 'all', message: `${chalk.bold.hex(COLORS.accent)('⭐ ALL')} ${muted('- Include all ForgeStack packages')}` },
-      { name: 'bear', message: `${accent('🐻 Bear UI')} ${muted('- Component library + Theme')}` },
-      { name: 'grid-table', message: `${accent('📊 Grid Table')} ${muted('- Advanced data grid')}` },
-      { name: 'forge-query', message: `${accent('🔍 Forge Query')} ${muted('- Data fetching & caching')}` },
-      { name: 'forge-form', message: `${accent('📝 Forge Form')} ${muted('- Form state management')}` },
-    ],
-    initial: ['all'],
+    hint: muted('(Use <space> to select, <a> to toggle all)'),
+    choices,
+    initial: [0], // Pre-select "ALL" by index
   });
 
-  const packages = await multiselect.run();
+  const packages = response.packages;
   const hasAll = packages.includes('all');
   
   return {
@@ -146,6 +156,9 @@ export const promptForgePackages = async (): Promise<{
     gridTable: hasAll || packages.includes('grid-table'),
     forgeQuery: hasAll || packages.includes('forge-query'),
     forgeForm: hasAll || packages.includes('forge-form'),
+    relay: hasAll || packages.includes('relay'),
+    crucible: hasAll || packages.includes('crucible'),
+    auth: hasAll || packages.includes('forge-auth'),
   };
 };
 

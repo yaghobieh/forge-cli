@@ -9,38 +9,27 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@forgedevstack/forge-cli"><img src="https://img.shields.io/npm/v/@forgedevstack/forge-cli.svg?style=flat-square&color=ec4899" alt="npm version" /></a>
-  <a href="https://www.npmjs.com/package/@forgedevstack/forge-cli"><img src="https://img.shields.io/npm/dm/@forgedevstack/forge-cli.svg?style=flat-square&color=8b5cf6" alt="npm downloads" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/npm/l/@forgedevstack/forge-cli.svg?style=flat-square" alt="license" /></a>
+  <a href="https://www.npmjs.com/package/create-forge"><img src="https://img.shields.io/npm/v/create-forge.svg?style=flat-square&color=ec4899" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/create-forge"><img src="https://img.shields.io/npm/dm/create-forge.svg?style=flat-square&color=8b5cf6" alt="npm downloads" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/npm/l/create-forge.svg?style=flat-square" alt="license" /></a>
 </p>
 
 ---
 
 ## Quick Start
 
-The CLI is published as `@forgedevstack/forge-cli`. Use it with npx, pnpm, yarn, or bun:
-
 ```bash
-# With npx (no install)
-npx @forgedevstack/forge-cli create my-app
+# With npx
+npx create-forge my-app
 
 # With pnpm
-pnpm dlx @forgedevstack/forge-cli create my-app
+pnpm create forge my-app
 
-# With yarn (v2+)
-yarn dlx @forgedevstack/forge-cli create my-app
+# With yarn
+yarn create forge my-app
 
 # With bun
-bunx @forgedevstack/forge-cli create my-app
-```
-
-Install globally to use the `forge` or `create-forge` commands from anywhere:
-
-```bash
-npm install -g @forgedevstack/forge-cli
-forge create my-app
-# or
-create-forge my-app
+bunx create-forge my-app
 ```
 
 ## Features
@@ -53,6 +42,9 @@ create-forge my-app
 - **Forge Form** - Advanced form management
 - **Forge Query** - Data fetching with caching
 - **Grid Table** - Powerful data grid component
+- **Relay** - Zero-dependency HTTP client with WebSocket support
+- **Forge Auth** - Authentication & OAuth (Google, Facebook, GitHub)
+- **Crucible** - Full-stack testing framework (client & server)
 - **Anvil Utils** - Common utilities and hooks
 - **Harbor Backend** - Complete Node.js framework (MongoDB, JWT, WebSocket, Scheduling)
 - **Multiple Package Managers** - npm, pnpm, yarn, bun
@@ -87,9 +79,13 @@ forge add [package]
 #   synapse       - State Management
 #   anvil         - Utilities & Hooks
 #   harbor        - Backend Framework
+#   relay         - HTTP Client & WebSockets
+#   forge-auth    - Authentication & OAuth
+#   crucible      - Testing Framework (client & server)
 
 # Options:
 #   -c, --color <hex>               Bear UI primary color
+#   -s, --scope <scope>             Crucible scope (client, server, both)
 ```
 
 ### Generate Synapse Nuclear Slice
@@ -186,23 +182,26 @@ npm run docker:compose
 ### Create with All Options
 
 ```bash
-npx @forgedevstack/forge-cli create my-app --template react --package-manager pnpm --yes
+npx create-forge my-app --template react --package-manager pnpm --yes
 ```
 
 ### Custom Output Directory
 
 ```bash
-npx @forgedevstack/forge-cli create my-app --out-dir ./projects/my-app
+npx create-forge my-app --out-dir ./projects/my-app
 ```
 
 ### Add Packages to Existing Project
 
 ```bash
 cd my-project
-npx @forgedevstack/forge-cli add bear --color "#3b82f6"
-npx @forgedevstack/forge-cli add synapse
-npx @forgedevstack/forge-cli nuclear user
-npx @forgedevstack/forge-cli nuclear cart
+npx forge add bear --color "#3b82f6"
+npx forge add synapse
+npx forge add relay
+npx forge add forge-auth
+npx forge add crucible --scope both
+npx forge nuclear user
+npx forge nuclear cart
 ```
 
 ## ForgeStack Packages
@@ -215,6 +214,9 @@ npx @forgedevstack/forge-cli nuclear cart
 | `@forgedevstack/forge-form` | ![npm](https://img.shields.io/npm/v/@forgedevstack/forge-form?style=flat-square&label=) | Form Management |
 | `@forgedevstack/forge-query` | ![npm](https://img.shields.io/npm/v/@forgedevstack/forge-query?style=flat-square&label=) | Data Fetching |
 | `@forgedevstack/grid-table` | ![npm](https://img.shields.io/npm/v/@forgedevstack/grid-table?style=flat-square&label=) | Data Grid |
+| `@forgedevstack/relay` | ![npm](https://img.shields.io/npm/v/@forgedevstack/relay?style=flat-square&label=) | HTTP Client & WebSockets |
+| `@forgedevstack/forge-auth` | ![npm](https://img.shields.io/npm/v/@forgedevstack/forge-auth?style=flat-square&label=) | Authentication & OAuth |
+| `@forgedevstack/crucible` | ![npm](https://img.shields.io/npm/v/@forgedevstack/crucible?style=flat-square&label=) | Testing Framework |
 | `@forgedevstack/anvil` | ![npm](https://img.shields.io/npm/v/@forgedevstack/anvil?style=flat-square&label=) | Utilities |
 | `@forgedevstack/harbor` | ![npm](https://img.shields.io/npm/v/@forgedevstack/harbor?style=flat-square&label=) | Backend Framework |
 
@@ -225,6 +227,10 @@ npx @forgedevstack/forge-cli nuclear cart
 - [Synapse](https://forgedevstack.com/synapse)
 - [Forge Compass](https://forgedevstack.com/compass)
 - [Grid Table](https://forgedevstack.com/table)
+- [Relay](https://forgedevstack.com/relay)
+- [Forge Auth](https://forgedevstack.com/auth)
+- [Crucible](https://forgedevstack.com/crucible)
+- [Anvil](https://forgedevstack.com/anvil)
 - [**Harbor**](https://forgedevstack.com/harbor)
 
 ## Changelog
