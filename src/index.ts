@@ -8,7 +8,7 @@ const program = new Command();
 program
   .name('forge')
   .description('⚒️  Forge CLI - Create and manage ForgeStack projects')
-  .version('1.0.0-alpha');
+  .version('1.2.0');
 
 // Create command
 program

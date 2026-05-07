@@ -37,6 +37,14 @@ export const generateReactTemplate = async (
     await ensureDir(path.join(projectDir, 'src', 'nuclear', 'slices', 'user'));
   }
 
+  // Store for RTK
+  if (config.stateManager === 'rtk') {
+    await ensureDir(path.join(projectDir, 'src', 'store'));
+    await ensureDir(path.join(projectDir, 'src', 'store', 'slices'));
+    await ensureDir(path.join(projectDir, 'src', 'store', 'slices', 'app'));
+    await ensureDir(path.join(projectDir, 'src', 'store', 'slices', 'user'));
+  }
+
   // Scripts for generators
   await ensureDir(path.join(projectDir, 'scripts'));
 
@@ -56,6 +64,14 @@ export const generateReactTemplate = async (
   
   if (config.stateManager === 'synapse') {
     await generateNuclearState(projectDir, config);
+  }
+
+  if (config.stateManager === 'rtk') {
+    await generateRTKState(projectDir, config);
+  }
+
+  if (config.includeBackend) {
+    await generateBackendServer(projectDir, config);
   }
   
   if (config.includeDocker) {
@@ -94,11 +110,18 @@ async function generatePackageJson(projectDir: string, config: ProjectConfig) {
     chalk: '^5.3.0',
   };
 
-  // Add ForgeStack packages with latest versions
   dependencies['@forgedevstack/anvil'] = versions.anvil;
   
   if (config.includeBear) {
     dependencies['@forgedevstack/bear'] = versions.bear;
+  }
+
+  if (config.cssFramework === 'aerocraft') {
+    dependencies['@forgedevstack/aerocraft'] = versions.aerocraft;
+  } else if (config.cssFramework === 'tailwind') {
+    devDependencies['tailwindcss'] = '^3.4.17';
+    devDependencies['autoprefixer'] = '^10.4.20';
+    devDependencies['postcss'] = '^8.5.1';
   }
   
   if (config.includeGridTable) {
@@ -123,6 +146,11 @@ async function generatePackageJson(projectDir: string, config: ProjectConfig) {
     dependencies['@forgedevstack/synapse'] = versions.synapse;
   }
 
+  if (config.stateManager === 'rtk') {
+    dependencies['@reduxjs/toolkit'] = '^2.5.0';
+    dependencies['react-redux'] = '^9.2.0';
+  }
+
   if (config.includeRelay) {
     dependencies['@forgedevstack/relay'] = versions.relay;
   }
@@ -131,8 +159,24 @@ async function generatePackageJson(projectDir: string, config: ProjectConfig) {
     dependencies['@forgedevstack/forge-auth'] = versions.forgeAuth;
   }
 
+  if (config.includeLingo) {
+    dependencies['@forgedevstack/lingo'] = versions.lingo;
+  }
+
+  if (config.includeRail) {
+    dependencies['@forgedevstack/rail'] = versions.rail;
+  }
+
+  if (config.includeTorch) {
+    dependencies['@forgedevstack/torch'] = versions.torch;
+  }
+
   if (config.includeCrucible) {
     devDependencies['@forgedevstack/crucible'] = versions.crucible;
+  }
+
+  if (config.includeKiln) {
+    devDependencies['@forgedevstack/kiln'] = versions.kiln;
   }
 
   const scripts: Record<string, string> = {
@@ -144,8 +188,12 @@ async function generatePackageJson(projectDir: string, config: ProjectConfig) {
     'generate:component': 'tsx scripts/generate-component.ts',
   };
 
-  if (config.stateManager === 'synapse') {
+  if (config.stateManager === 'synapse' || config.stateManager === 'rtk') {
     scripts['generate:slice'] = 'tsx scripts/generate-slice.ts';
+  }
+
+  if (config.includeBackend) {
+    scripts['server:dev'] = 'cd server && npm run dev';
   }
 
   if (config.includeDocker) {
@@ -171,17 +219,21 @@ async function generatePackageJson(projectDir: string, config: ProjectConfig) {
 }
 
 async function getLatestVersions(): Promise<Record<string, string>> {
-  // Try to fetch latest versions, fallback to known versions
   const packages = [
-    { name: 'bear', pkg: '@forgedevstack/bear', fallback: '^1.0.7' },
-    { name: 'synapse', pkg: '@forgedevstack/synapse', fallback: '^1.0.0' },
-    { name: 'forgeCompass', pkg: '@forgedevstack/forge-compass', fallback: '^1.2.1' },
-    { name: 'forgeQuery', pkg: '@forgedevstack/forge-query', fallback: '^1.0.0' },
+    { name: 'bear', pkg: '@forgedevstack/bear', fallback: '^1.2.2' },
+    { name: 'aerocraft', pkg: '@forgedevstack/aerocraft', fallback: '^1.0.4' },
+    { name: 'synapse', pkg: '@forgedevstack/synapse', fallback: '^1.0.2' },
+    { name: 'forgeCompass', pkg: '@forgedevstack/forge-compass', fallback: '^1.0.2' },
+    { name: 'forgeQuery', pkg: '@forgedevstack/forge-query', fallback: '^1.0.1' },
     { name: 'forgeForm', pkg: '@forgedevstack/forge-form', fallback: '^1.0.0' },
-    { name: 'gridTable', pkg: '@forgedevstack/grid-table', fallback: '^1.0.0' },
-    { name: 'anvil', pkg: '@forgedevstack/anvil', fallback: '^1.0.0' },
+    { name: 'gridTable', pkg: '@forgedevstack/grid-table', fallback: '^1.0.8' },
+    { name: 'anvil', pkg: '@forgedevstack/anvil', fallback: '^1.0.6' },
     { name: 'relay', pkg: '@forgedevstack/relay', fallback: '^1.0.0' },
     { name: 'forgeAuth', pkg: '@forgedevstack/forge-auth', fallback: '^1.0.0' },
+    { name: 'lingo', pkg: '@forgedevstack/lingo', fallback: '^1.0.0' },
+    { name: 'rail', pkg: '@forgedevstack/rail', fallback: '^1.0.0' },
+    { name: 'torch', pkg: '@forgedevstack/torch', fallback: '^1.0.0' },
+    { name: 'kiln', pkg: '@forgedevstack/kiln', fallback: '^1.0.5' },
     { name: 'crucible', pkg: '@forgedevstack/crucible', fallback: '^1.0.0' },
   ];
 
@@ -214,6 +266,11 @@ async function generateTsConfig(projectDir: string, config: ProjectConfig) {
   if (config.stateManager === 'synapse') {
     paths['@nuclear/*'] = ['./src/nuclear/*'];
     paths['@slices/*'] = ['./src/nuclear/slices/*'];
+  }
+
+  if (config.stateManager === 'rtk') {
+    paths['@store/*'] = ['./src/store/*'];
+    paths['@slices/*'] = ['./src/store/slices/*'];
   }
 
   const tsconfig = {
@@ -261,9 +318,16 @@ async function generateTsConfig(projectDir: string, config: ProjectConfig) {
 // vite.config.ts
 // ============================================================================
 async function generateViteConfig(projectDir: string, config: ProjectConfig) {
-  const nuclearAlias = config.stateManager === 'synapse' ? `
+  let stateAlias = '';
+  if (config.stateManager === 'synapse') {
+    stateAlias = `
       '@nuclear': path.resolve(__dirname, './src/nuclear'),
-      '@slices': path.resolve(__dirname, './src/nuclear/slices'),` : '';
+      '@slices': path.resolve(__dirname, './src/nuclear/slices'),`;
+  } else if (config.stateManager === 'rtk') {
+    stateAlias = `
+      '@store': path.resolve(__dirname, './src/store'),
+      '@slices': path.resolve(__dirname, './src/store/slices'),`;
+  }
 
   const viteConfig = `import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -279,7 +343,7 @@ export default defineConfig({
       '@api': path.resolve(__dirname, './src/api'),
       '@config': path.resolve(__dirname, './src/config'),
       '@types': path.resolve(__dirname, './src/types'),
-      '@assets': path.resolve(__dirname, './src/assets'),${nuclearAlias}
+      '@assets': path.resolve(__dirname, './src/assets'),${stateAlias}
     },
   },
   server: {
@@ -335,25 +399,36 @@ import { BearProvider, type BearTheme } from '@forgedevstack/bear';
 `;
   }
 
+  if (config.stateManager === 'rtk') {
+    imports += `import { Provider } from 'react-redux';
+import { store } from '@store/store';
+`;
+  }
+
   let themeConfig = '';
   let wrapperStart = '';
   let wrapperEnd = '';
 
+  if (config.stateManager === 'rtk') {
+    wrapperStart += `<Provider store={store}>
+      `;
+    wrapperEnd = `
+    </Provider>` + wrapperEnd;
+  }
+
   if (config.includeBear) {
     const primaryColor = config.bearPrimaryColor || '#ec4899';
     themeConfig = `
-// Customize Bear theme
 const theme: Partial<BearTheme> = {
   colors: {
     primary: '${primaryColor}',
-    // secondary: '#8b5cf6',
   },
 };
 `;
-    wrapperStart = `<BearProvider theme={theme}>
+    wrapperStart += `<BearProvider theme={theme}>
         `;
     wrapperEnd = `
-      </BearProvider>`;
+      </BearProvider>` + wrapperEnd;
   }
 
   const mainTsx = `${imports}${themeConfig}
@@ -517,10 +592,67 @@ export const routes: RouteConfig[] = [
     await writeFile(path.join(projectDir, 'src', 'config', 'routes.tsx'), routesTsx);
   }
 
+  // i18n.ts (Lingo translations — centralized)
+  if (config.includeLingo) {
+    const i18nTs = `export const translations = {
+  en: {
+    // ── Home ───────────────────────────────────
+    home: {
+      title: 'Welcome to ${config.name}',
+      subtitle: 'Built with ForgeStack',
+      getStarted: 'Get Started',
+      viewUsers: 'View Users',
+    },
+    // ── Dashboard ──────────────────────────────
+    dashboard: {
+      title: 'Dashboard',
+      subtitle: 'State management demo',
+      counter: 'Counter',
+      loadingState: 'Loading State',
+      loading: 'Loading...',
+      ready: 'Ready',
+      simulate: 'Simulate',
+    },
+    // ── Users ──────────────────────────────────
+    users: {
+      title: 'Users',
+      subtitle: 'Manage your users with Grid Table',
+      name: 'Name',
+      email: 'Email',
+      role: 'Role',
+      created: 'Created',
+    },
+    // ── About ──────────────────────────────────
+    about: {
+      title: 'About',
+      techStack: 'Tech Stack',
+    },
+    // ── Settings ───────────────────────────────
+    settings: {
+      title: 'Settings',
+      notifications: 'Notifications',
+      receiveAlerts: 'Receive alerts',
+      save: 'Save',
+      cancel: 'Cancel',
+    },
+    // ── NotFound ───────────────────────────────
+    notFound: {
+      title: 'Page Not Found',
+      goHome: 'Go Home',
+    },
+  },
+} as const;
+
+export type TranslationKeys = typeof translations.en;
+`;
+    await writeFile(path.join(projectDir, 'src', 'config', 'i18n.ts'), i18nTs);
+  }
+
   // index.ts
   await writeFile(path.join(projectDir, 'src', 'config', 'index.ts'), `export * from './env';
 export * from './constants';
 ${config.router === 'compass' ? "export * from './routes';" : ''}
+${config.includeLingo ? "export { translations } from './i18n';" : ''}
 `);
 }
 
@@ -687,13 +819,23 @@ ${useSynapse ? "export * from './users';" : ''}
 }
 
 // ============================================================================
-// Components
+// Components — Structure: Name/ > index.ts, Name.tsx, Name.types.ts
 // ============================================================================
 async function generateComponents(projectDir: string, config: ProjectConfig) {
   const useBear = config.includeBear;
   
-  // Layout
-  let layoutImports = `import { ReactNode, Suspense } from 'react';`;
+  // ── Layout ─────────────────────────────────────────────────────────────
+  // Layout.types.ts
+  await writeFile(path.join(projectDir, 'src', 'components', 'Layout', 'Layout.types.ts'),
+`import { ReactNode } from 'react';
+
+export interface LayoutProps {
+  children: ReactNode;
+}
+`);
+
+  let layoutImports = `import { Suspense } from 'react';
+import type { LayoutProps } from './Layout.types';`;
   let navLink = '';
   
   if (config.router === 'compass') {
@@ -722,10 +864,6 @@ async function generateComponents(projectDir: string, config: ProjectConfig) {
 
   const layoutTsx = `${layoutImports}
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
 export const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="app-layout">
@@ -745,19 +883,24 @@ export const Layout = ({ children }: LayoutProps) => {
 `;
 
   await writeFile(path.join(projectDir, 'src', 'components', 'Layout', 'Layout.tsx'), layoutTsx);
-  await writeFile(path.join(projectDir, 'src', 'components', 'Layout', 'index.ts'), `export * from './Layout';
+  await writeFile(path.join(projectDir, 'src', 'components', 'Layout', 'index.ts'), `export { Layout } from './Layout';
+export type { LayoutProps } from './Layout.types';
 `);
 
-  // FeatureCard
+  // ── FeatureCard ────────────────────────────────────────────────────────
   await ensureDir(path.join(projectDir, 'src', 'components', 'common', 'FeatureCard'));
 
-  const featureCardTsx = useBear ? `import { Card, CardBody, Typography, Flex } from '@forgedevstack/bear';
-
-interface FeatureCardProps {
+  // FeatureCard.types.ts
+  await writeFile(path.join(projectDir, 'src', 'components', 'common', 'FeatureCard', 'FeatureCard.types.ts'),
+`export interface FeatureCardProps {
   icon: string;
   title: string;
   description: string;
 }
+`);
+
+  const featureCardTsx = useBear ? `import { Card, CardBody, Typography, Flex } from '@forgedevstack/bear';
+import type { FeatureCardProps } from './FeatureCard.types';
 
 export const FeatureCard = ({ icon, title, description }: FeatureCardProps) => (
   <Card hoverable>
@@ -770,11 +913,7 @@ export const FeatureCard = ({ icon, title, description }: FeatureCardProps) => (
     </CardBody>
   </Card>
 );
-` : `interface FeatureCardProps {
-  icon: string;
-  title: string;
-  description: string;
-}
+` : `import type { FeatureCardProps } from './FeatureCard.types';
 
 export const FeatureCard = ({ icon, title, description }: FeatureCardProps) => (
   <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 12, padding: 24 }}>
@@ -786,7 +925,8 @@ export const FeatureCard = ({ icon, title, description }: FeatureCardProps) => (
 `;
 
   await writeFile(path.join(projectDir, 'src', 'components', 'common', 'FeatureCard', 'FeatureCard.tsx'), featureCardTsx);
-  await writeFile(path.join(projectDir, 'src', 'components', 'common', 'FeatureCard', 'index.ts'), `export * from './FeatureCard';
+  await writeFile(path.join(projectDir, 'src', 'components', 'common', 'FeatureCard', 'index.ts'), `export { FeatureCard } from './FeatureCard';
+export type { FeatureCardProps } from './FeatureCard.types';
 `);
 
   await writeFile(path.join(projectDir, 'src', 'components', 'common', 'index.ts'), `export * from './FeatureCard';
@@ -798,37 +938,64 @@ export * from './common';
 }
 
 // ============================================================================
-// Pages
+// Pages — Structure: Name/ > index.ts, Name.tsx, Name.types.ts, Name.const.ts
+//         Lingo translations are centralized in config/i18n.ts
 // ============================================================================
 async function generatePages(projectDir: string, config: ProjectConfig) {
   const useBear = config.includeBear;
   const useGridTable = config.includeGridTable;
   const useSynapse = config.stateManager === 'synapse';
+  const useRTK = config.stateManager === 'rtk';
+  const useLingo = config.includeLingo;
 
-  // Home Page
-  const homePage = useBear ? `import { Typography, Button, Flex } from '@forgedevstack/bear';
-${config.router === 'compass' ? `import { useNavigate } from '@forgedevstack/forge-compass';` : ''}
-import { FeatureCard } from '@components/common';
+  // ── Home Page ──────────────────────────────────────────────────────────
+  // Home.types.ts
+  await writeFile(path.join(projectDir, 'src', 'pages', 'Home', 'Home.types.ts'),
+`export interface Feature {
+  icon: string;
+  title: string;
+  description: string;
+}
+`);
 
-const FEATURES = [
+  // Home.const.ts
+  await writeFile(path.join(projectDir, 'src', 'pages', 'Home', 'Home.const.ts'),
+`import type { Feature } from './Home.types';
+
+export const FEATURES: Feature[] = [
   { icon: '⚡', title: 'Lightning Fast', description: 'Built with Vite for instant HMR.' },
   { icon: '🎨', title: 'Beautiful UI', description: 'Powered by Bear UI.' },
   { icon: '🔒', title: 'Type Safe', description: 'Full TypeScript support.' },
   { icon: '📦', title: 'Modular', description: 'Clean architecture.' },
 ];
+`);
+
+  // Home.tsx
+  const homeImports: string[] = [];
+  if (useBear) homeImports.push(`import { Typography, Button, Flex } from '@forgedevstack/bear';`);
+  if (config.router === 'compass') homeImports.push(`import { useNavigate } from '@forgedevstack/forge-compass';`);
+  homeImports.push(`import { FeatureCard } from '@components/common';`);
+  homeImports.push(`import { FEATURES } from './Home.const';`);
+  if (useLingo) homeImports.push(`import { translations } from '@config/i18n';`);
+
+  const homeTitleText = useLingo ? `translations.en.home.title` : `'Welcome to ${config.name}'`;
+  const homeSubText = useLingo ? `translations.en.home.subtitle` : `'Built with ForgeStack'`;
+  const homeGetStartedText = useLingo ? `{translations.en.home.getStarted}` : 'Get Started';
+  const homeViewUsersText = useLingo ? `{translations.en.home.viewUsers}` : 'View Users';
+
+  const homePage = useBear ? `${homeImports.join('\n')}
 
 export const HomePage = () => {
-  ${config.router === 'compass' ? `const navigate = useNavigate();` : ''}
-
+  ${config.router === 'compass' ? `const navigate = useNavigate();\n` : ''}
   return (
     <>
       <div className="page-header">
-        <Typography variant="h1" className="page-title">Welcome to ${config.name}</Typography>
-        <Typography variant="body1" className="page-subtitle">Built with ForgeStack</Typography>
+        <Typography variant="h1" className="page-title">{${homeTitleText}}</Typography>
+        <Typography variant="body1" className="page-subtitle">{${homeSubText}}</Typography>
       </div>
       <Flex gap={16} style={{ marginTop: 24 }}>
-        <Button variant="primary"${config.router === 'compass' ? ` onClick={() => navigate('/dashboard')}` : ''}>Get Started</Button>
-        <Button variant="outline"${config.router === 'compass' ? ` onClick={() => navigate('/users')}` : ''}>View Users</Button>
+        <Button variant="primary"${config.router === 'compass' ? ` onClick={() => navigate('/dashboard')}` : ''}>${homeGetStartedText}</Button>
+        <Button variant="outline"${config.router === 'compass' ? ` onClick={() => navigate('/users')}` : ''}>${homeViewUsersText}</Button>
       </Flex>
       <div className="card-grid">
         {FEATURES.map((f) => <FeatureCard key={f.title} {...f} />)}
@@ -836,18 +1003,13 @@ export const HomePage = () => {
     </>
   );
 };
-` : `import { FeatureCard } from '@components/common';
-
-const FEATURES = [
-  { icon: '⚡', title: 'Lightning Fast', description: 'Built with Vite.' },
-  { icon: '🔒', title: 'Type Safe', description: 'TypeScript support.' },
-];
+` : `${homeImports.join('\n')}
 
 export const HomePage = () => (
   <>
     <div className="page-header">
-      <h1 className="page-title">Welcome to ${config.name}</h1>
-      <p className="page-subtitle">Built with ForgeStack</p>
+      <h1 className="page-title">{${homeTitleText}}</h1>
+      <p className="page-subtitle">{${homeSubText}}</p>
     </div>
     <div className="card-grid">
       {FEATURES.map((f) => <FeatureCard key={f.title} {...f} />)}
@@ -857,12 +1019,39 @@ export const HomePage = () => (
 `;
 
   await writeFile(path.join(projectDir, 'src', 'pages', 'Home', 'Home.tsx'), homePage);
-  await writeFile(path.join(projectDir, 'src', 'pages', 'Home', 'index.ts'), `export * from './Home';
+  await writeFile(path.join(projectDir, 'src', 'pages', 'Home', 'index.ts'), `export { HomePage } from './Home';
+export type { Feature } from './Home.types';
 `);
 
-  // Dashboard Page
-  const dashboardPage = useBear && useSynapse ? `import { Typography, Card, CardBody, Button, Flex, Badge } from '@forgedevstack/bear';
-import { useAppNucleus } from '@slices/app';
+  // ── Dashboard Page ─────────────────────────────────────────────────────
+
+  // Dashboard.types.ts
+  await writeFile(path.join(projectDir, 'src', 'pages', 'Dashboard', 'Dashboard.types.ts'),
+`export interface DashboardProps {}
+`);
+
+  // Dashboard.const.ts
+  await writeFile(path.join(projectDir, 'src', 'pages', 'Dashboard', 'Dashboard.const.ts'),
+`export const SIMULATE_DELAY = 2000;
+`);
+
+  let dashboardPage: string;
+
+  if (useBear && (useSynapse || useRTK)) {
+    const stateImport = useSynapse
+      ? `import { useAppNucleus } from '@slices/app';`
+      : `import { useAppSelector, useAppDispatch } from '@store/store';
+import { selectCount, selectIsLoading, increment, decrement, reset, setLoading } from '@slices/app';`;
+
+    const stateLabel = useSynapse ? 'Synapse' : 'Redux Toolkit';
+    const lingoImport = useLingo ? `\nimport { translations } from '@config/i18n';` : '';
+    const t = (key: string, fallback: string) => useLingo ? `{translations.en.dashboard.${key}}` : fallback;
+    const tExpr = (key: string, fallback: string) => useLingo ? `translations.en.dashboard.${key}` : `'${fallback}'`;
+
+    if (useSynapse) {
+      dashboardPage = `import { Typography, Card, CardBody, Button, Flex, Badge } from '@forgedevstack/bear';
+${stateImport}
+import { SIMULATE_DELAY } from './Dashboard.const';${lingoImport}
 
 export const DashboardPage = () => {
   const { count, increment, decrement, reset, isLoading, setLoading } = useAppNucleus();
@@ -871,16 +1060,16 @@ export const DashboardPage = () => {
     <>
       <div className="page-header">
         <Flex align="center" gap={12}>
-          <Typography variant="h1" className="page-title">Dashboard</Typography>
-          <Badge variant="success">Synapse</Badge>
+          <Typography variant="h1" className="page-title">${t('title', 'Dashboard')}</Typography>
+          <Badge variant="success">${stateLabel}</Badge>
         </Flex>
-        <Typography variant="body1" className="page-subtitle">State management demo</Typography>
+        <Typography variant="body1" className="page-subtitle">${t('subtitle', 'State management demo')}</Typography>
       </div>
 
       <div className="card-grid">
         <Card>
           <CardBody>
-            <Typography variant="h4" style={{ marginBottom: 16 }}>Counter</Typography>
+            <Typography variant="h4" style={{ marginBottom: 16 }}>${t('counter', 'Counter')}</Typography>
             <Typography variant="h2" style={{ textAlign: 'center', marginBottom: 16 }}>{count}</Typography>
             <Flex gap={8} justify="center">
               <Button onClick={decrement} variant="outline">-</Button>
@@ -891,14 +1080,14 @@ export const DashboardPage = () => {
         </Card>
         <Card>
           <CardBody>
-            <Typography variant="h4" style={{ marginBottom: 16 }}>Loading State</Typography>
-            <Badge variant={isLoading ? 'warning' : 'success'}>{isLoading ? 'Loading...' : 'Ready'}</Badge>
+            <Typography variant="h4" style={{ marginBottom: 16 }}>${t('loadingState', 'Loading State')}</Typography>
+            <Badge variant={isLoading ? 'warning' : 'success'}>{isLoading ? ${tExpr('loading', 'Loading...')} : ${tExpr('ready', 'Ready')}}</Badge>
             <Button 
-              onClick={() => { setLoading(true); setTimeout(() => setLoading(false), 2000); }}
+              onClick={() => { setLoading(true); setTimeout(() => setLoading(false), SIMULATE_DELAY); }}
               variant="outline"
               style={{ marginTop: 16 }}
             >
-              Simulate
+              ${t('simulate', 'Simulate')}
             </Button>
           </CardBody>
         </Card>
@@ -906,7 +1095,60 @@ export const DashboardPage = () => {
     </>
   );
 };
-` : `import { useState } from 'react';
+`;
+    } else {
+      dashboardPage = `import { Typography, Card, CardBody, Button, Flex, Badge } from '@forgedevstack/bear';
+${stateImport}
+import { SIMULATE_DELAY } from './Dashboard.const';${lingoImport}
+
+export const DashboardPage = () => {
+  const dispatch = useAppDispatch();
+  const count = useAppSelector(selectCount);
+  const isLoading = useAppSelector(selectIsLoading);
+
+  return (
+    <>
+      <div className="page-header">
+        <Flex align="center" gap={12}>
+          <Typography variant="h1" className="page-title">${t('title', 'Dashboard')}</Typography>
+          <Badge variant="success">${stateLabel}</Badge>
+        </Flex>
+        <Typography variant="body1" className="page-subtitle">${t('subtitle', 'State management demo')}</Typography>
+      </div>
+
+      <div className="card-grid">
+        <Card>
+          <CardBody>
+            <Typography variant="h4" style={{ marginBottom: 16 }}>${t('counter', 'Counter')}</Typography>
+            <Typography variant="h2" style={{ textAlign: 'center', marginBottom: 16 }}>{count}</Typography>
+            <Flex gap={8} justify="center">
+              <Button onClick={() => dispatch(decrement())} variant="outline">-</Button>
+              <Button onClick={() => dispatch(increment())} variant="primary">+</Button>
+              <Button onClick={() => dispatch(reset())} variant="ghost">Reset</Button>
+            </Flex>
+          </CardBody>
+        </Card>
+        <Card>
+          <CardBody>
+            <Typography variant="h4" style={{ marginBottom: 16 }}>${t('loadingState', 'Loading State')}</Typography>
+            <Badge variant={isLoading ? 'warning' : 'success'}>{isLoading ? ${tExpr('loading', 'Loading...')} : ${tExpr('ready', 'Ready')}}</Badge>
+            <Button 
+              onClick={() => { dispatch(setLoading(true)); setTimeout(() => dispatch(setLoading(false)), SIMULATE_DELAY); }}
+              variant="outline"
+              style={{ marginTop: 16 }}
+            >
+              ${t('simulate', 'Simulate')}
+            </Button>
+          </CardBody>
+        </Card>
+      </div>
+    </>
+  );
+};
+`;
+    }
+  } else {
+    dashboardPage = `import { useState } from 'react';
 
 export const DashboardPage = () => {
   const [count, setCount] = useState(0);
@@ -926,125 +1168,62 @@ export const DashboardPage = () => {
   );
 };
 `;
+  }
 
   await writeFile(path.join(projectDir, 'src', 'pages', 'Dashboard', 'Dashboard.tsx'), dashboardPage);
-  await writeFile(path.join(projectDir, 'src', 'pages', 'Dashboard', 'index.ts'), `export * from './Dashboard';
+  await writeFile(path.join(projectDir, 'src', 'pages', 'Dashboard', 'index.ts'), `export { DashboardPage } from './Dashboard';
 `);
 
-  // Users Page with Grid Table
-  let usersPage = '';
-  
-  if (useGridTable && useSynapse) {
-    usersPage = `import { useMemo } from 'react';
-import { GridTable, type ColumnDefinition } from '@forgedevstack/grid-table';
-${useBear ? `import { Typography, Card, CardBody, Badge, Skeleton } from '@forgedevstack/bear';` : ''}
-import { useUsers } from '@api/users';
-import type { User } from '@types/index';
+  // ── Users Page ─────────────────────────────────────────────────────────
+  // Users.types.ts
+  await writeFile(path.join(projectDir, 'src', 'pages', 'Users', 'Users.types.ts'),
+`export interface UsersPageProps {}
+`);
 
-const columns: ColumnDefinition<User>[] = [
-  {
-    id: 'name',
-    accessor: 'name',
-    header: 'Name',
-    sortable: true,
-    filterable: true,
-  },
-  {
-    id: 'email',
-    accessor: 'email',
-    header: 'Email',
-    sortable: true,
-  },
-  {
-    id: 'role',
-    accessor: 'role',
-    header: 'Role',
-    filterType: 'select',
-    filterOptions: [
-      { value: 'admin', label: 'Admin' },
-      { value: 'user', label: 'User' },
-    ],
-    cell: ({ value }) => (
-      <Badge variant={value === 'admin' ? 'primary' : 'secondary'}>{value}</Badge>
-    ),
-  },
-  {
-    id: 'createdAt',
-    accessor: 'createdAt',
-    header: 'Created',
-    cell: ({ value }) => new Date(value).toLocaleDateString(),
-  },
-];
+  // Users.const.ts
+  await writeFile(path.join(projectDir, 'src', 'pages', 'Users', 'Users.const.ts'),
+`import type { User } from '@types/index';
 
-// Mock data for demo
-const MOCK_USERS: User[] = [
+export const MOCK_USERS: User[] = [
   { id: '1', name: 'John Doe', email: 'john@example.com', role: 'admin', createdAt: '2024-01-15' },
   { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'user', createdAt: '2024-02-20' },
   { id: '3', name: 'Bob Wilson', email: 'bob@example.com', role: 'user', createdAt: '2024-03-10' },
   { id: '4', name: 'Alice Brown', email: 'alice@example.com', role: 'admin', createdAt: '2024-04-05' },
   { id: '5', name: 'Charlie Davis', email: 'charlie@example.com', role: 'user', createdAt: '2024-05-12' },
 ];
+`);
 
-export const UsersPage = () => {
-  // Use mock data for demo, replace with: const { data, loading, error } = useUsers();
-  const data = MOCK_USERS;
-  const loading = false;
-
-  if (loading) {
-    return (
-      <>
-        <div className="page-header">
-          <Typography variant="h1" className="page-title">Users</Typography>
-        </div>
-        <Skeleton height={400} />
-      </>
-    );
-  }
-
-  return (
-    <>
-      <div className="page-header">
-        <Typography variant="h1" className="page-title">Users</Typography>
-        <Typography variant="body1" className="page-subtitle">Manage your users with Grid Table</Typography>
-      </div>
-
-      <Card style={{ marginTop: 24 }}>
-        <CardBody style={{ padding: 0, overflow: 'hidden' }}>
-          <GridTable
-            data={data || []}
-            columns={columns}
-            enableRowSelection
-            showPagination
-            showFilter
-            pageSize={10}
-          />
-        </CardBody>
-      </Card>
-    </>
-  );
-};
-`;
-  } else if (useGridTable) {
+  let usersPage = '';
+  
+  if (useGridTable) {
     usersPage = `import { GridTable, type ColumnDefinition } from '@forgedevstack/grid-table';
+${useBear ? `import { Typography, Card, CardBody, Badge } from '@forgedevstack/bear';` : ''}
 import type { User } from '@types/index';
-
+import { MOCK_USERS } from './Users.const';
+${useLingo ? `import { translations } from '@config/i18n';\n` : ''}
 const columns: ColumnDefinition<User>[] = [
-  { id: 'name', accessor: 'name', header: 'Name', sortable: true },
-  { id: 'email', accessor: 'email', header: 'Email' },
-  { id: 'role', accessor: 'role', header: 'Role' },
-];
-
-const MOCK_USERS: User[] = [
-  { id: '1', name: 'John Doe', email: 'john@example.com', role: 'admin', createdAt: '2024-01-15' },
-  { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'user', createdAt: '2024-02-20' },
+  { id: 'name', accessor: 'name', header: 'Name', sortable: true, filterable: true },
+  { id: 'email', accessor: 'email', header: 'Email', sortable: true },
+  {
+    id: 'role', accessor: 'role', header: 'Role',
+    filterType: 'select',
+    filterOptions: [{ value: 'admin', label: 'Admin' }, { value: 'user', label: 'User' }],
+    ${useBear ? `cell: ({ value }) => <Badge variant={value === 'admin' ? 'primary' : 'secondary'}>{value}</Badge>,` : ''}
+  },
+  { id: 'createdAt', accessor: 'createdAt', header: 'Created', cell: ({ value }) => new Date(value).toLocaleDateString() },
 ];
 
 export const UsersPage = () => (
   <>
     <div className="page-header">
-      <h1 className="page-title">Users</h1>
+      ${useBear ? `<Typography variant="h1" className="page-title">${useLingo ? '{translations.en.users.title}' : 'Users'}</Typography>
+      <Typography variant="body1" className="page-subtitle">${useLingo ? '{translations.en.users.subtitle}' : 'Manage your users with Grid Table'}</Typography>` : `<h1 className="page-title">Users</h1>`}
     </div>
-    <GridTable data={MOCK_USERS} columns={columns} showPagination />
+    ${useBear ? `<Card style={{ marginTop: 24 }}>
+      <CardBody style={{ padding: 0, overflow: 'hidden' }}>
+        <GridTable data={MOCK_USERS} columns={columns} enableRowSelection showPagination showFilter pageSize={10} />
+      </CardBody>
+    </Card>` : `<GridTable data={MOCK_USERS} columns={columns} showPagination />`}
   </>
 );
 `;
@@ -1066,9 +1245,7 @@ export const UsersPage = () => (
 );
 ` : `export const UsersPage = () => (
   <>
-    <div className="page-header">
-      <h1 className="page-title">Users</h1>
-    </div>
+    <div className="page-header"><h1 className="page-title">Users</h1></div>
     <p>Add grid-table for data management</p>
   </>
 );
@@ -1076,66 +1253,97 @@ export const UsersPage = () => (
   }
 
   await writeFile(path.join(projectDir, 'src', 'pages', 'Users', 'Users.tsx'), usersPage);
-  await writeFile(path.join(projectDir, 'src', 'pages', 'Users', 'index.ts'), `export * from './Users';
+  await writeFile(path.join(projectDir, 'src', 'pages', 'Users', 'index.ts'), `export { UsersPage } from './Users';
 `);
 
-  // About, Settings, NotFound pages (simplified)
+  // ── About Page ─────────────────────────────────────────────────────────
+  // About.types.ts
+  await writeFile(path.join(projectDir, 'src', 'pages', 'About', 'About.types.ts'),
+`export interface AboutPageProps {}
+`);
+
+  // About.const.ts
+  const techStack = ['React 18 + TypeScript', 'Vite'];
+  if (config.includeBear) techStack.push('Bear UI');
+  if (config.router === 'compass') techStack.push('Forge Compass');
+  if (useSynapse) techStack.push('Synapse');
+  if (useRTK) techStack.push('Redux Toolkit');
+  if (useGridTable) techStack.push('Grid Table');
+  techStack.push('Anvil Utils');
+
+  await writeFile(path.join(projectDir, 'src', 'pages', 'About', 'About.const.ts'),
+`export const TECH_STACK = ${JSON.stringify(techStack, null, 2)};
+`);
+
   const aboutPage = useBear ? `import { Typography, Card, CardBody } from '@forgedevstack/bear';
-
-const TECH = ['React 18 + TypeScript', 'Vite', ${config.includeBear ? "'Bear UI', " : ''}${config.router === 'compass' ? "'Forge Compass', " : ''}${useSynapse ? "'Synapse', " : ''}${useGridTable ? "'Grid Table', " : ''}'Anvil Utils'];
-
+import { TECH_STACK } from './About.const';
+${useLingo ? `import { translations } from '@config/i18n';\n` : ''}
 export const AboutPage = () => (
   <>
     <div className="page-header">
-      <Typography variant="h1" className="page-title">About</Typography>
+      <Typography variant="h1" className="page-title">${useLingo ? '{translations.en.about.title}' : 'About'}</Typography>
     </div>
     <Card>
       <CardBody>
-        <Typography variant="h4" style={{ marginBottom: 16 }}>Tech Stack</Typography>
+        <Typography variant="h4" style={{ marginBottom: 16 }}>${useLingo ? '{translations.en.about.techStack}' : 'Tech Stack'}</Typography>
         <ul style={{ listStyle: 'none' }}>
-          {TECH.map(t => <li key={t} style={{ padding: '8px 0', color: 'var(--text-muted)' }}>✓ {t}</li>)}
+          {TECH_STACK.map(t => <li key={t} style={{ padding: '8px 0', color: 'var(--text-muted)' }}>✓ {t}</li>)}
         </ul>
       </CardBody>
     </Card>
   </>
 );
-` : `export const AboutPage = () => (
+` : `import { TECH_STACK } from './About.const';
+
+export const AboutPage = () => (
   <>
     <div className="page-header"><h1 className="page-title">About</h1></div>
-    <p>Built with ForgeStack</p>
+    <ul style={{ listStyle: 'none' }}>
+      {TECH_STACK.map(t => <li key={t} style={{ padding: '8px 0' }}>✓ {t}</li>)}
+    </ul>
   </>
 );
 `;
 
   await writeFile(path.join(projectDir, 'src', 'pages', 'About', 'About.tsx'), aboutPage);
-  await writeFile(path.join(projectDir, 'src', 'pages', 'About', 'index.ts'), `export * from './About';
+  await writeFile(path.join(projectDir, 'src', 'pages', 'About', 'index.ts'), `export { AboutPage } from './About';
+`);
+
+  // ── Settings Page ──────────────────────────────────────────────────────
+  await writeFile(path.join(projectDir, 'src', 'pages', 'Settings', 'Settings.types.ts'),
+`export interface SettingsPageProps {}
+`);
+
+  await writeFile(path.join(projectDir, 'src', 'pages', 'Settings', 'Settings.const.ts'),
+`export const DEFAULT_NOTIFICATIONS = true;
 `);
 
   const settingsPage = useBear ? `import { useState } from 'react';
 import { Typography, Card, CardBody, Button, Flex, Switch } from '@forgedevstack/bear';
-
+import { DEFAULT_NOTIFICATIONS } from './Settings.const';
+${useLingo ? `import { translations } from '@config/i18n';\n` : ''}
 export const SettingsPage = () => {
-  const [notifications, setNotifications] = useState(true);
+  const [notifications, setNotifications] = useState(DEFAULT_NOTIFICATIONS);
 
   return (
     <>
       <div className="page-header">
-        <Typography variant="h1" className="page-title">Settings</Typography>
+        <Typography variant="h1" className="page-title">${useLingo ? '{translations.en.settings.title}' : 'Settings'}</Typography>
       </div>
       <Card>
         <CardBody>
           <Flex justify="space-between" align="center">
             <div>
-              <Typography variant="body1">Notifications</Typography>
-              <Typography variant="body2" color="muted">Receive alerts</Typography>
+              <Typography variant="body1">${useLingo ? '{translations.en.settings.notifications}' : 'Notifications'}</Typography>
+              <Typography variant="body2" color="muted">${useLingo ? '{translations.en.settings.receiveAlerts}' : 'Receive alerts'}</Typography>
             </div>
             <Switch checked={notifications} onChange={(e) => setNotifications(e.target.checked)} />
           </Flex>
         </CardBody>
       </Card>
       <Flex gap={12} style={{ marginTop: 24 }}>
-        <Button variant="primary">Save</Button>
-        <Button variant="outline">Cancel</Button>
+        <Button variant="primary">${useLingo ? '{translations.en.settings.save}' : 'Save'}</Button>
+        <Button variant="outline">${useLingo ? '{translations.en.settings.cancel}' : 'Cancel'}</Button>
       </Flex>
     </>
   );
@@ -1148,36 +1356,46 @@ export const SettingsPage = () => {
 `;
 
   await writeFile(path.join(projectDir, 'src', 'pages', 'Settings', 'Settings.tsx'), settingsPage);
-  await writeFile(path.join(projectDir, 'src', 'pages', 'Settings', 'index.ts'), `export * from './Settings';
+  await writeFile(path.join(projectDir, 'src', 'pages', 'Settings', 'index.ts'), `export { SettingsPage } from './Settings';
+`);
+
+  // ── NotFound Page ──────────────────────────────────────────────────────
+  await writeFile(path.join(projectDir, 'src', 'pages', 'NotFound', 'NotFound.types.ts'),
+`export interface NotFoundPageProps {}
+`);
+
+  await writeFile(path.join(projectDir, 'src', 'pages', 'NotFound', 'NotFound.const.ts'),
+`export const ERROR_CODE = '404';
 `);
 
   const notFoundPage = useBear ? `import { Typography, Button, Flex } from '@forgedevstack/bear';
-${config.router === 'compass' ? `import { useNavigate } from '@forgedevstack/forge-compass';` : ''}
-
+${config.router === 'compass' ? `import { useNavigate } from '@forgedevstack/forge-compass';\n` : ''}import { ERROR_CODE } from './NotFound.const';
+${useLingo ? `import { translations } from '@config/i18n';\n` : ''}
 export const NotFoundPage = () => {
-  ${config.router === 'compass' ? `const navigate = useNavigate();` : ''}
-
+  ${config.router === 'compass' ? `const navigate = useNavigate();\n` : ''}
   return (
     <Flex direction="column" align="center" justify="center" style={{ minHeight: '60vh', textAlign: 'center' }}>
-      <Typography variant="h1" style={{ fontSize: '6rem' }}>404</Typography>
-      <Typography variant="h3">Page Not Found</Typography>
-      <Button variant="primary" style={{ marginTop: 32 }}${config.router === 'compass' ? ` onClick={() => navigate('/')}` : ''}>Go Home</Button>
+      <Typography variant="h1" style={{ fontSize: '6rem' }}>{ERROR_CODE}</Typography>
+      <Typography variant="h3">${useLingo ? '{translations.en.notFound.title}' : 'Page Not Found'}</Typography>
+      <Button variant="primary" style={{ marginTop: 32 }}${config.router === 'compass' ? ` onClick={() => navigate('/')}` : ''}>${useLingo ? '{translations.en.notFound.goHome}' : 'Go Home'}</Button>
     </Flex>
   );
 };
-` : `export const NotFoundPage = () => (
+` : `import { ERROR_CODE } from './NotFound.const';
+
+export const NotFoundPage = () => (
   <div style={{ textAlign: 'center', paddingTop: '20vh' }}>
-    <h1 style={{ fontSize: '6rem' }}>404</h1>
+    <h1 style={{ fontSize: '6rem' }}>{ERROR_CODE}</h1>
     <a href="/">Go Home</a>
   </div>
 );
 `;
 
   await writeFile(path.join(projectDir, 'src', 'pages', 'NotFound', 'NotFound.tsx'), notFoundPage);
-  await writeFile(path.join(projectDir, 'src', 'pages', 'NotFound', 'index.ts'), `export * from './NotFound';
+  await writeFile(path.join(projectDir, 'src', 'pages', 'NotFound', 'index.ts'), `export { NotFoundPage } from './NotFound';
 `);
 
-  // Pages index
+  // Pages barrel index
   await writeFile(path.join(projectDir, 'src', 'pages', 'index.ts'), `export * from './Home';
 export * from './Dashboard';
 export * from './Users';
@@ -1298,6 +1516,576 @@ export * from './slices';
 }
 
 // ============================================================================
+// RTK State — SDK Pattern: store/ > slices/ > Name/ >
+//   Name.api.ts, Name.reducers.ts, Name.manager.ts, Name.selectors.ts, index.ts
+// ============================================================================
+async function generateRTKState(projectDir: string, _config: ProjectConfig) {
+  // store/store.ts
+  await writeFile(path.join(projectDir, 'src', 'store', 'store.ts'),
+`import { configureStore } from '@reduxjs/toolkit';
+import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux';
+import { appReducer } from '@slices/app';
+import { userReducer } from '@slices/user';
+
+export const store = configureStore({
+  reducer: {
+    app: appReducer,
+    user: userReducer,
+  },
+  devTools: import.meta.env.DEV,
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+`);
+
+  await writeFile(path.join(projectDir, 'src', 'store', 'index.ts'),
+`export { store, useAppDispatch, useAppSelector } from './store';
+export type { RootState, AppDispatch } from './store';
+`);
+
+  // ── slices/app ─────────────────────────────────────────────────────────
+  // app.api.ts
+  await writeFile(path.join(projectDir, 'src', 'store', 'slices', 'app', 'app.api.ts'),
+`import { createAsyncThunk } from '@reduxjs/toolkit';
+
+export const fetchAppConfig = createAsyncThunk(
+  'app/fetchConfig',
+  async () => {
+    const res = await fetch('/api/config');
+    return res.json();
+  }
+);
+`);
+
+  // app.reducers.ts
+  await writeFile(path.join(projectDir, 'src', 'store', 'slices', 'app', 'app.reducers.ts'),
+`import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+
+interface AppState {
+  count: number;
+  isLoading: boolean;
+  error: string | null;
+}
+
+const initialState: AppState = {
+  count: 0,
+  isLoading: false,
+  error: null,
+};
+
+const appSlice = createSlice({
+  name: 'app',
+  initialState,
+  reducers: {
+    increment: (state) => { state.count += 1; },
+    decrement: (state) => { state.count -= 1; },
+    reset: (state) => { state.count = 0; },
+    setLoading: (state, action: PayloadAction<boolean>) => { state.isLoading = action.payload; },
+    setError: (state, action: PayloadAction<string | null>) => { state.error = action.payload; },
+  },
+});
+
+export const { increment, decrement, reset, setLoading, setError } = appSlice.actions;
+export const appReducer = appSlice.reducer;
+`);
+
+  // app.manager.ts
+  await writeFile(path.join(projectDir, 'src', 'store', 'slices', 'app', 'app.manager.ts'),
+`import { useAppDispatch, useAppSelector } from '@store/store';
+import { increment, decrement, reset, setLoading, setError } from './app.reducers';
+import { selectCount, selectIsLoading, selectError } from './app.selectors';
+
+export const useAppManager = () => {
+  const dispatch = useAppDispatch();
+  const count = useAppSelector(selectCount);
+  const isLoading = useAppSelector(selectIsLoading);
+  const error = useAppSelector(selectError);
+
+  return {
+    count,
+    isLoading,
+    error,
+    increment: () => dispatch(increment()),
+    decrement: () => dispatch(decrement()),
+    reset: () => dispatch(reset()),
+    setLoading: (val: boolean) => dispatch(setLoading(val)),
+    setError: (val: string | null) => dispatch(setError(val)),
+  };
+};
+`);
+
+  // app.selectors.ts
+  await writeFile(path.join(projectDir, 'src', 'store', 'slices', 'app', 'app.selectors.ts'),
+`import type { RootState } from '@store/store';
+
+export const selectCount = (state: RootState) => state.app.count;
+export const selectIsLoading = (state: RootState) => state.app.isLoading;
+export const selectError = (state: RootState) => state.app.error;
+`);
+
+  // app/index.ts
+  await writeFile(path.join(projectDir, 'src', 'store', 'slices', 'app', 'index.ts'),
+`export { appReducer, increment, decrement, reset, setLoading, setError } from './app.reducers';
+export { selectCount, selectIsLoading, selectError } from './app.selectors';
+export { useAppManager } from './app.manager';
+export { fetchAppConfig } from './app.api';
+`);
+
+  // ── slices/user ────────────────────────────────────────────────────────
+  // user.api.ts
+  await writeFile(path.join(projectDir, 'src', 'store', 'slices', 'user', 'user.api.ts'),
+`import { createAsyncThunk } from '@reduxjs/toolkit';
+import type { User } from '@types/index';
+
+export const fetchUser = createAsyncThunk(
+  'user/fetchUser',
+  async (id: string) => {
+    const res = await fetch(\`/api/users/\${id}\`);
+    return res.json() as Promise<User>;
+  }
+);
+`);
+
+  // user.reducers.ts
+  await writeFile(path.join(projectDir, 'src', 'store', 'slices', 'user', 'user.reducers.ts'),
+`import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { User } from '@types/index';
+
+interface UserState {
+  user: User | null;
+  isAuthenticated: boolean;
+}
+
+const initialState: UserState = {
+  user: null,
+  isAuthenticated: false,
+};
+
+const userSlice = createSlice({
+  name: 'user',
+  initialState,
+  reducers: {
+    login: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      state.isAuthenticated = true;
+    },
+    logout: (state) => {
+      state.user = null;
+      state.isAuthenticated = false;
+    },
+  },
+});
+
+export const { login, logout } = userSlice.actions;
+export const userReducer = userSlice.reducer;
+`);
+
+  // user.manager.ts
+  await writeFile(path.join(projectDir, 'src', 'store', 'slices', 'user', 'user.manager.ts'),
+`import { useAppDispatch, useAppSelector } from '@store/store';
+import { login, logout } from './user.reducers';
+import { selectUser, selectIsAuthenticated } from './user.selectors';
+import type { User } from '@types/index';
+
+export const useUserManager = () => {
+  const dispatch = useAppDispatch();
+  const user = useAppSelector(selectUser);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+
+  return {
+    user,
+    isAuthenticated,
+    login: (u: User) => dispatch(login(u)),
+    logout: () => dispatch(logout()),
+  };
+};
+`);
+
+  // user.selectors.ts
+  await writeFile(path.join(projectDir, 'src', 'store', 'slices', 'user', 'user.selectors.ts'),
+`import type { RootState } from '@store/store';
+
+export const selectUser = (state: RootState) => state.user.user;
+export const selectIsAuthenticated = (state: RootState) => state.user.isAuthenticated;
+`);
+
+  // user/index.ts
+  await writeFile(path.join(projectDir, 'src', 'store', 'slices', 'user', 'index.ts'),
+`export { userReducer, login, logout } from './user.reducers';
+export { selectUser, selectIsAuthenticated } from './user.selectors';
+export { useUserManager } from './user.manager';
+export { fetchUser } from './user.api';
+`);
+
+  // slices/index.ts
+  await writeFile(path.join(projectDir, 'src', 'store', 'slices', 'index.ts'),
+`export * from './app';
+export * from './user';
+`);
+}
+
+// ============================================================================
+// Backend Server — server/ > src/ > App.ts, routes/, controllers/, services/,
+//   middleware/ (logger, httpLogger, auth), WebSocket support
+// ============================================================================
+async function generateBackendServer(projectDir: string, config: ProjectConfig) {
+  const serverDir = path.join(projectDir, 'server');
+  await ensureDir(serverDir);
+  await ensureDir(path.join(serverDir, 'src'));
+  await ensureDir(path.join(serverDir, 'src', 'routes'));
+  await ensureDir(path.join(serverDir, 'src', 'controllers'));
+  await ensureDir(path.join(serverDir, 'src', 'services'));
+  await ensureDir(path.join(serverDir, 'src', 'middleware'));
+
+  const isHarbor = config.serverFramework === 'harbor';
+
+  // ── package.json ─────────────────────────────────────────────────────
+  const serverDeps: Record<string, string> = {};
+  const serverDevDeps: Record<string, string> = {
+    '@types/node': '^20.10.0',
+    typescript: '^5.7.3',
+    tsx: '^4.7.0',
+  };
+
+  if (isHarbor) {
+    serverDeps['@forgedevstack/harbor'] = '^1.6.2';
+  } else {
+    serverDeps['express'] = '^4.21.0';
+    serverDeps['cors'] = '^2.8.5';
+    serverDeps['dotenv'] = '^16.4.0';
+    serverDeps['ws'] = '^8.16.0';
+    serverDevDeps['@types/express'] = '^4.17.21';
+    serverDevDeps['@types/cors'] = '^2.8.17';
+    serverDevDeps['@types/ws'] = '^8.5.10';
+  }
+
+  const serverPkgJson = {
+    name: `${config.name}-server`,
+    version: '0.1.0',
+    private: true,
+    type: 'module',
+    scripts: {
+      dev: 'tsx watch src/index.ts',
+      build: 'tsc',
+      start: 'node dist/index.js',
+    },
+    dependencies: serverDeps,
+    devDependencies: serverDevDeps,
+  };
+
+  await writeFile(path.join(serverDir, 'package.json'), JSON.stringify(serverPkgJson, null, 2));
+
+  // ── tsconfig.json ────────────────────────────────────────────────────
+  const serverTsConfig = {
+    compilerOptions: {
+      target: 'ES2020',
+      module: 'ESNext',
+      moduleResolution: 'bundler',
+      outDir: './dist',
+      rootDir: './src',
+      strict: true,
+      esModuleInterop: true,
+      skipLibCheck: true,
+    },
+    include: ['src'],
+  };
+
+  await writeFile(path.join(serverDir, 'tsconfig.json'), JSON.stringify(serverTsConfig, null, 2));
+
+  // ── middleware/logger.ts ─────────────────────────────────────────────
+  await writeFile(path.join(serverDir, 'src', 'middleware', 'logger.ts'),
+`const colors = {
+  reset: '\\x1b[0m',
+  dim: '\\x1b[2m',
+  green: '\\x1b[32m',
+  yellow: '\\x1b[33m',
+  cyan: '\\x1b[36m',
+  red: '\\x1b[31m',
+};
+
+export const logger = {
+  info: (message: string, ...args: unknown[]) => {
+    console.log(\`\${colors.cyan}[INFO]\${colors.reset} \${colors.dim}\${new Date().toISOString()}\${colors.reset} \${message}\`, ...args);
+  },
+  warn: (message: string, ...args: unknown[]) => {
+    console.warn(\`\${colors.yellow}[WARN]\${colors.reset} \${colors.dim}\${new Date().toISOString()}\${colors.reset} \${message}\`, ...args);
+  },
+  error: (message: string, ...args: unknown[]) => {
+    console.error(\`\${colors.red}[ERROR]\${colors.reset} \${colors.dim}\${new Date().toISOString()}\${colors.reset} \${message}\`, ...args);
+  },
+  success: (message: string, ...args: unknown[]) => {
+    console.log(\`\${colors.green}[OK]\${colors.reset} \${colors.dim}\${new Date().toISOString()}\${colors.reset} \${message}\`, ...args);
+  },
+};
+`);
+
+  // ── middleware/httpLogger.ts ──────────────────────────────────────────
+  await writeFile(path.join(serverDir, 'src', 'middleware', 'httpLogger.ts'),
+`import type { Request, Response, NextFunction } from '${isHarbor ? '@forgedevstack/harbor' : 'express'}';
+import { logger } from './logger';
+
+export const httpLogger = (req: Request, res: Response, next: NextFunction) => {
+  const start = Date.now();
+
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    const status = res.statusCode;
+    const color = status >= 400 ? 'error' : status >= 300 ? 'warn' : 'info';
+    logger[color](\`\${req.method} \${req.originalUrl} \${status} \${duration}ms\`);
+  });
+
+  next();
+};
+`);
+
+  // ── middleware/auth.ts ───────────────────────────────────────────────
+  await writeFile(path.join(serverDir, 'src', 'middleware', 'auth.ts'),
+`import type { Request, Response, NextFunction } from '${isHarbor ? '@forgedevstack/harbor' : 'express'}';
+
+export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+};
+`);
+
+  // ── middleware/index.ts ──────────────────────────────────────────────
+  await writeFile(path.join(serverDir, 'src', 'middleware', 'index.ts'),
+`export { logger } from './logger';
+export { httpLogger } from './httpLogger';
+export { authMiddleware } from './auth';
+`);
+
+  // ── services/user.service.ts ─────────────────────────────────────────
+  await writeFile(path.join(serverDir, 'src', 'services', 'user.service.ts'),
+`interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+const USERS: User[] = [
+  { id: '1', name: 'John Doe', email: 'john@example.com', role: 'admin' },
+  { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'user' },
+  { id: '3', name: 'Bob Wilson', email: 'bob@example.com', role: 'user' },
+];
+
+export const userService = {
+  getAll: (): User[] => USERS,
+
+  getById: (id: string): User | undefined => USERS.find(u => u.id === id),
+
+  create: (data: Omit<User, 'id'>): User => {
+    const user = { ...data, id: String(USERS.length + 1) };
+    USERS.push(user);
+    return user;
+  },
+
+  update: (id: string, data: Partial<User>): User | undefined => {
+    const index = USERS.findIndex(u => u.id === id);
+    if (index === -1) return undefined;
+    USERS[index] = { ...USERS[index], ...data };
+    return USERS[index];
+  },
+
+  delete: (id: string): boolean => {
+    const index = USERS.findIndex(u => u.id === id);
+    if (index === -1) return false;
+    USERS.splice(index, 1);
+    return true;
+  },
+};
+`);
+
+  // ── services/index.ts ────────────────────────────────────────────────
+  await writeFile(path.join(serverDir, 'src', 'services', 'index.ts'),
+`export { userService } from './user.service';
+`);
+
+  // ── controllers/user.controller.ts ───────────────────────────────────
+  await writeFile(path.join(serverDir, 'src', 'controllers', 'user.controller.ts'),
+`import type { Request, Response } from '${isHarbor ? '@forgedevstack/harbor' : 'express'}';
+import { userService } from '../services';
+
+export const userController = {
+  getAll: (_req: Request, res: Response) => {
+    res.json(userService.getAll());
+  },
+
+  getById: (req: Request, res: Response) => {
+    const user = userService.getById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  },
+
+  create: (req: Request, res: Response) => {
+    const user = userService.create(req.body);
+    res.status(201).json(user);
+  },
+
+  update: (req: Request, res: Response) => {
+    const user = userService.update(req.params.id, req.body);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  },
+
+  delete: (req: Request, res: Response) => {
+    const deleted = userService.delete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'User not found' });
+    res.status(204).send();
+  },
+};
+`);
+
+  // ── controllers/index.ts ─────────────────────────────────────────────
+  await writeFile(path.join(serverDir, 'src', 'controllers', 'index.ts'),
+`export { userController } from './user.controller';
+`);
+
+  // ── routes/users.ts (uses controller) ────────────────────────────────
+  if (isHarbor) {
+    await writeFile(path.join(serverDir, 'src', 'routes', 'users.ts'),
+`import { createRouter } from '@forgedevstack/harbor';
+import { userController } from '../controllers';
+
+export const userRoutes = createRouter();
+
+userRoutes.get('/', userController.getAll);
+userRoutes.get('/:id', userController.getById);
+userRoutes.post('/', userController.create);
+userRoutes.put('/:id', userController.update);
+userRoutes.delete('/:id', userController.delete);
+`);
+  } else {
+    await writeFile(path.join(serverDir, 'src', 'routes', 'users.ts'),
+`import { Router } from 'express';
+import { userController } from '../controllers';
+
+export const userRoutes = Router();
+
+userRoutes.get('/', userController.getAll);
+userRoutes.get('/:id', userController.getById);
+userRoutes.post('/', userController.create);
+userRoutes.put('/:id', userController.update);
+userRoutes.delete('/:id', userController.delete);
+`);
+  }
+
+  // ── routes/index.ts ──────────────────────────────────────────────────
+  await writeFile(path.join(serverDir, 'src', 'routes', 'index.ts'),
+`export { userRoutes } from './users';
+`);
+
+  // ── App.ts (main server with logger, httpLogger, socket) ─────────────
+  if (isHarbor) {
+    await writeFile(path.join(serverDir, 'src', 'App.ts'),
+`import { createServer } from '@forgedevstack/harbor';
+import { userRoutes } from './routes';
+import { httpLogger, logger } from './middleware';
+
+const app = createServer({
+  port: Number(process.env.PORT) || 8080,
+  cors: true,
+  logging: true,
+});
+
+app.use(httpLogger);
+
+app.use('/api/users', userRoutes);
+
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.listen();
+logger.success(\`Server started on port \${Number(process.env.PORT) || 8080}\`);
+`);
+  } else {
+    await writeFile(path.join(serverDir, 'src', 'App.ts'),
+`import express from 'express';
+import cors from 'cors';
+import { createServer } from 'http';
+import { WebSocketServer } from 'ws';
+import { userRoutes } from './routes';
+import { httpLogger, logger } from './middleware';
+
+const app = express();
+const PORT = Number(process.env.PORT) || 8080;
+
+app.use(cors());
+app.use(express.json());
+app.use(httpLogger);
+
+app.use('/api/users', userRoutes);
+
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+const server = createServer(app);
+
+const wss = new WebSocketServer({ server, path: '/ws' });
+
+wss.on('connection', (ws) => {
+  logger.info('WebSocket client connected');
+
+  ws.on('message', (data) => {
+    logger.info(\`WS message: \${data}\`);
+    wss.clients.forEach((client) => {
+      if (client.readyState === ws.OPEN) {
+        client.send(String(data));
+      }
+    });
+  });
+
+  ws.on('close', () => {
+    logger.info('WebSocket client disconnected');
+  });
+});
+
+export { app, server, wss, PORT };
+`);
+  }
+
+  // ── index.ts (entry point — imports App and starts) ──────────────────
+  if (isHarbor) {
+    await writeFile(path.join(serverDir, 'src', 'index.ts'),
+`import './App';
+`);
+  } else {
+    await writeFile(path.join(serverDir, 'src', 'index.ts'),
+`import { server, PORT } from './App';
+import { logger } from './middleware';
+
+server.listen(PORT, () => {
+  logger.success(\`Server running on http://localhost:\${PORT}\`);
+  logger.info(\`WebSocket available at ws://localhost:\${PORT}/ws\`);
+});
+`);
+  }
+
+  // ── .env ─────────────────────────────────────────────────────────────
+  await writeFile(path.join(serverDir, '.env'),
+`PORT=8080
+NODE_ENV=development
+`);
+
+  // ── .gitignore ───────────────────────────────────────────────────────
+  await writeFile(path.join(serverDir, '.gitignore'),
+`node_modules
+dist
+.env
+`);
+}
+
+// ============================================================================
 // Docker Files
 // ============================================================================
 async function generateDockerFiles(projectDir: string, config: ProjectConfig) {
@@ -1379,6 +2167,12 @@ async function main() {
 
   fs.mkdirSync(dir, { recursive: true });
 
+  fs.writeFileSync(path.join(dir, \`\${name}.types.ts\`), \`export interface \${name}PageProps {}
+\`);
+
+  fs.writeFileSync(path.join(dir, \`\${name}.const.ts\`), \`// Constants for \${name} page
+\`);
+
   fs.writeFileSync(path.join(dir, \`\${name}.tsx\`), \`export const \${name}Page = () => (
   <div className="page-header">
     <h1 className="page-title">\${name}</h1>
@@ -1386,10 +2180,11 @@ async function main() {
 );
 \`);
 
-  fs.writeFileSync(path.join(dir, 'index.ts'), \`export * from './\${name}';
+  fs.writeFileSync(path.join(dir, 'index.ts'), \`export { \${name}Page } from './\${name}';
+export type { \${name}PageProps } from './\${name}.types';
 \`);
 
-  console.log(chalk.green(\`✓ Page \${name} created!\`));
+  console.log(chalk.green(\`✓ Page \${name} created with types, const, and component!\`));
 }
 
 main().catch(console.error);
@@ -1420,15 +2215,19 @@ async function main() {
 
   fs.mkdirSync(dir, { recursive: true });
 
-  fs.writeFileSync(path.join(dir, \`\${name}.tsx\`), \`interface \${name}Props {}
+  fs.writeFileSync(path.join(dir, \`\${name}.types.ts\`), \`export interface \${name}Props {}
+\`);
+
+  fs.writeFileSync(path.join(dir, \`\${name}.tsx\`), \`import type { \${name}Props } from './\${name}.types';
 
 export const \${name} = ({}: \${name}Props) => <div>\${name}</div>;
 \`);
 
-  fs.writeFileSync(path.join(dir, 'index.ts'), \`export * from './\${name}';
+  fs.writeFileSync(path.join(dir, 'index.ts'), \`export { \${name} } from './\${name}';
+export type { \${name}Props } from './\${name}.types';
 \`);
 
-  console.log(chalk.green(\`✓ Component \${name} created!\`));
+  console.log(chalk.green(\`✓ Component \${name} created with types!\`));
 }
 
 main().catch(console.error);
@@ -1502,6 +2301,111 @@ main().catch(console.error);
 
     await writeFile(path.join(projectDir, 'scripts', 'generate-slice.ts'), generateSlice);
   }
+
+  if (config.stateManager === 'rtk') {
+    const generateRTKSlice = `#!/usr/bin/env tsx
+import enquirer from 'enquirer';
+import fs from 'fs';
+import path from 'path';
+import chalk from 'chalk';
+
+const { prompt } = enquirer;
+
+async function main() {
+  const { name } = await prompt<{ name: string }>({
+    type: 'input',
+    name: 'name',
+    message: 'Slice name (camelCase):',
+  });
+
+  const dir = path.join(process.cwd(), 'src', 'store', 'slices', name);
+  const pascal = name.charAt(0).toUpperCase() + name.slice(1);
+
+  if (fs.existsSync(dir)) {
+    console.log(chalk.red(\`Slice \${name} exists!\`));
+    process.exit(1);
+  }
+
+  fs.mkdirSync(dir, { recursive: true });
+
+  fs.writeFileSync(path.join(dir, \`\${name}.api.ts\`), \`import { createAsyncThunk } from '@reduxjs/toolkit';
+
+export const fetch\${pascal} = createAsyncThunk(
+  '\${name}/fetch',
+  async () => {
+    const res = await fetch('/api/\${name}');
+    return res.json();
+  }
+);
+\`);
+
+  fs.writeFileSync(path.join(dir, \`\${name}.reducers.ts\`), \`import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+
+interface \${pascal}State {
+  items: unknown[];
+  isLoading: boolean;
+  error: string | null;
+}
+
+const initialState: \${pascal}State = {
+  items: [],
+  isLoading: false,
+  error: null,
+};
+
+const \${name}Slice = createSlice({
+  name: '\${name}',
+  initialState,
+  reducers: {
+    setItems: (state, action: PayloadAction<unknown[]>) => { state.items = action.payload; },
+    setLoading: (state, action: PayloadAction<boolean>) => { state.isLoading = action.payload; },
+    setError: (state, action: PayloadAction<string | null>) => { state.error = action.payload; },
+  },
+});
+
+export const { setItems, setLoading, setError } = \${name}Slice.actions;
+export const \${name}Reducer = \${name}Slice.reducer;
+\`);
+
+  fs.writeFileSync(path.join(dir, \`\${name}.selectors.ts\`), \`import type { RootState } from '@store/store';
+
+export const select\${pascal}Items = (state: RootState) => state.\${name}?.items ?? [];
+export const select\${pascal}Loading = (state: RootState) => state.\${name}?.isLoading ?? false;
+\`);
+
+  fs.writeFileSync(path.join(dir, \`\${name}.manager.ts\`), \`import { useAppDispatch, useAppSelector } from '@store/store';
+import { setItems, setLoading, setError } from './\${name}.reducers';
+import { select\${pascal}Items, select\${pascal}Loading } from './\${name}.selectors';
+
+export const use\${pascal}Manager = () => {
+  const dispatch = useAppDispatch();
+  const items = useAppSelector(select\${pascal}Items);
+  const isLoading = useAppSelector(select\${pascal}Loading);
+
+  return {
+    items,
+    isLoading,
+    setItems: (val: unknown[]) => dispatch(setItems(val)),
+    setLoading: (val: boolean) => dispatch(setLoading(val)),
+    setError: (val: string | null) => dispatch(setError(val)),
+  };
+};
+\`);
+
+  fs.writeFileSync(path.join(dir, 'index.ts'), \`export { \${name}Reducer, setItems, setLoading, setError } from './\${name}.reducers';
+export { select\${pascal}Items, select\${pascal}Loading } from './\${name}.selectors';
+export { use\${pascal}Manager } from './\${name}.manager';
+export { fetch\${pascal} } from './\${name}.api';
+\`);
+
+  console.log(chalk.green(\`✓ RTK Slice \${name} created with api, reducers, selectors, manager!\`));
+}
+
+main().catch(console.error);
+`;
+
+    await writeFile(path.join(projectDir, 'scripts', 'generate-slice.ts'), generateRTKSlice);
+  }
 }
 
 // ============================================================================
@@ -1556,6 +2460,6 @@ ${config.packageManager}${config.packageManager === 'yarn' ? '' : ' run'} dev
 - \`build\` - Build for production
 - \`generate:page\` - Create new page
 - \`generate:component\` - Create new component
-${config.stateManager === 'synapse' ? '- `generate:slice` - Create Synapse slice\n' : ''}
+${config.stateManager === 'synapse' ? '- `generate:slice` - Create Synapse slice\n' : ''}${config.stateManager === 'rtk' ? '- `generate:slice` - Create RTK slice (api, reducers, manager, selectors)\n' : ''}${config.includeBackend ? '- `server:dev` - Start backend dev server\n' : ''}
 `);
 }

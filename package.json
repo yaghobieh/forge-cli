@@ -1,6 +1,6 @@
 {
   "name": "@forgedevstack/forge-cli",
-  "version": "1.0.2",
+  "version": "1.0.5",
   "description": "CLI to create and manage ForgeStack projects - React apps with optional server, state management, and UI components",
   "type": "module",
   "bin": {
@@ -30,7 +30,15 @@
     "state-management",
     "harbor",
     "backend",
-    "express"
+    "express",
+    "lingo",
+    "i18n",
+    "rail",
+    "carousel",
+    "torch",
+    "media-player",
+    "kiln",
+    "storybook-alternative"
   ],
   "author": "ForgeStack",
   "license": "MIT",

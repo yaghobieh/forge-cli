@@ -1,5 +1,53 @@
 # Changelog
 
+## 1.0.5 (2026-04-13)
+
+### New Packages
+
+- **AeroCraft** - CSS utility framework choice: AeroCraft vs Tailwind prompt with comparison table showing advantages (component recipes, runtime theming, model API, custom prefix, smaller bundle)
+- **Lingo** - Translation & localization with AI-powered translations, React hooks. Replaces i18n libs (i18next, react-intl)
+- **Rail** - Modular carousel & slider engine. Touch-ready, accessible, infinite scroll. Replaces Swiper/Embla
+- **Torch** - Media player (video, audio, reels, ads) with tracking & analytics. Replaces Video.js/Plyr
+- **Kiln** - Component docs & showcase. Lightweight Storybook alternative with live preview
+
+### New Features
+
+- **CSS Framework Choice** - Interactive prompt: AeroCraft vs Tailwind vs None, with side-by-side comparison table
+- **Comparison Tables** - Beautiful terminal tables showing ForgeStack advantages vs alternatives:
+  - Compass vs React Router (type safety, guards, bundle size, middleware)
+  - ForgeStack packages vs alternatives (Grid Table, Lingo, Torch, Rail, Forge Query, Synapse)
+- **`forge add aerocraft`** - Install AeroCraft standalone to any project
+
+### Dependency Updates (All Versions Corrected)
+
+| Package | Version | Previous |
+|---------|---------|----------|
+| Bear UI | `^1.2.2` | `^1.0.7` |
+| AeroCraft | `^1.0.4` | — (new) |
+| Grid Table | `^1.0.8` | `^1.0.0` |
+| Anvil | `^1.0.6` | `^1.0.0` |
+| Forge Compass | `^1.0.2` | `^1.2.1` |
+| Synapse | `^1.0.2` | `^1.0.0` |
+| Forge Query | `^1.0.1` | `^1.0.0` |
+| Harbor | `^1.6.2` | `^1.6.0` |
+| Kiln | `^1.0.5` | — (new) |
+
+### Improvements
+
+- Package selection prompt expanded to 12 ForgeStack packages with "replaces X" descriptions
+- `forge add` interactive menu includes 16 packages (added AeroCraft, Lingo, Rail, Torch)
+- `--yes` quick mode defaults to AeroCraft + all packages
+- Kiln and Crucible grouped as devDependencies in a single install step
+- `react.ts` template generates `package.json` with all new packages (lingo, rail, torch, kiln, aerocraft)
+- CLI version synchronized across `package.json` (`1.2.0`), Commander, and welcome banner
+
+### Future Plans Updated
+
+- [x] i18n integration (shipped as **Lingo**)
+- [x] CSS utility framework (shipped as **AeroCraft**)
+
+---
+
 ## 1.0.1 (2026-02-16)
 
 ### New Features
@@ -105,13 +153,15 @@ First alpha release of Forge CLI.
 
 ## Future Plans
 
-- [ ] Component library preview
+- [x] Component library preview (shipped as **Kiln**)
 - [ ] Database integration templates (Prisma, Drizzle)
 - [ ] CI/CD pipeline templates (GitHub Actions, GitLab CI)
 - [ ] Plugin system for custom templates
 - [ ] Project upgrade command
 - [ ] Workspace/Monorepo support
-- [x] Test setup (Crucible)
-- [ ] i18n integration
+- [x] Test setup (shipped as **Crucible**)
+- [x] i18n integration (shipped as **Lingo**)
+- [x] Media player (shipped as **Torch**)
+- [x] Carousel / slider (shipped as **Rail**)
 - [ ] PWA support
 - [ ] SSR/SSG templates

@@ -308,7 +308,7 @@ const generateHarborTemplate = async (
       'generate:route': 'npx @forgedevstack/harbor generate route',
     },
     dependencies: {
-      '@forgedevstack/harbor': '^1.0.0',
+      '@forgedevstack/harbor': '^1.6.2',
       dotenv: '^16.4.7',
     },
     devDependencies: serverDevDeps,

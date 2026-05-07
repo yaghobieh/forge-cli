@@ -34,16 +34,23 @@ bunx create-forge my-app
 
 ## Features
 
+- **CSS Framework Choice** - AeroCraft vs Tailwind with comparison table
+- **Comparison Tables** - Beautiful terminal tables showing ForgeStack vs alternatives
 - **Multiple Templates** - React, Server, Full-Stack monorepo
 - **Select All Packages** - One-click to include all ForgeStack packages
-- **Bear UI Integration** - Beautiful component library with customizable themes
+- **AeroCraft** - CSS utility framework with 25+ component recipes, runtime theming
+- **Bear UI Integration** - 50+ components, AeroCraft-powered, customizable themes
 - **Synapse State** - Powerful state management with "nuclear" folder structure
-- **Forge Compass** - Type-safe routing with guards
-- **Forge Form** - Advanced form management
-- **Forge Query** - Data fetching with caching
-- **Grid Table** - Powerful data grid component
+- **Forge Compass** - Type-safe routing with guards (vs React Router comparison)
+- **Forge Form** - Advanced form management with validation
+- **Forge Query** - Data fetching with auto caching, retry, optimistic updates
+- **Grid Table** - Headless data grid, drag columns, mobile-ready (replaces AG Grid)
 - **Relay** - Zero-dependency HTTP client with WebSocket support
 - **Forge Auth** - Authentication & OAuth (Google, Facebook, GitHub)
+- **Lingo** - AI-powered translations & localization (replaces i18next)
+- **Rail** - Modular carousel & slider, touch-ready, accessible (replaces Swiper)
+- **Torch** - Media player: video, audio, reels & ads with analytics (replaces Video.js)
+- **Kiln** - Component documentation & showcase (replaces Storybook)
 - **Crucible** - Full-stack testing framework (client & server)
 - **Anvil Utils** - Common utilities and hooks
 - **Harbor Backend** - Complete Node.js framework (MongoDB, JWT, WebSocket, Scheduling)
@@ -71,14 +78,19 @@ forge create [project-name]
 forge add [package]
 
 # Available packages:
-#   bear          - UI Component Library
-#   grid-table    - Data Grid
-#   forge-query   - Data Fetching
+#   bear          - UI Component Library (AeroCraft-powered)
+#   aerocraft     - CSS Utility Framework (Tailwind alternative)
+#   grid-table    - Data Grid (replaces AG Grid)
+#   forge-query   - Data Fetching (replaces TanStack Query)
 #   forge-form    - Form Management
-#   forge-compass - Routing
-#   synapse       - State Management
+#   forge-compass - Routing (replaces React Router)
+#   synapse       - State Management (replaces Redux)
 #   anvil         - Utilities & Hooks
 #   harbor        - Backend Framework
+#   lingo         - Translation & Localization (replaces i18next)
+#   rail          - Carousel & Slider (replaces Swiper)
+#   torch         - Media Player (replaces Video.js)
+#   kiln          - Component Docs (replaces Storybook)
 #   relay         - HTTP Client & WebSockets
 #   forge-auth    - Authentication & OAuth
 #   crucible      - Testing Framework (client & server)
@@ -196,9 +208,14 @@ npx create-forge my-app --out-dir ./projects/my-app
 ```bash
 cd my-project
 npx forge add bear --color "#3b82f6"
+npx forge add aerocraft
 npx forge add synapse
 npx forge add relay
 npx forge add forge-auth
+npx forge add lingo
+npx forge add rail
+npx forge add torch
+npx forge add kiln
 npx forge add crucible --scope both
 npx forge nuclear user
 npx forge nuclear cart
@@ -206,29 +223,39 @@ npx forge nuclear cart
 
 ## ForgeStack Packages
 
-| Package | Version | Description |
-|---------|---------|-------------|
-| `@forgedevstack/bear` | ![npm](https://img.shields.io/npm/v/@forgedevstack/bear?style=flat-square&label=) | UI Component Library |
-| `@forgedevstack/synapse` | ![npm](https://img.shields.io/npm/v/@forgedevstack/synapse?style=flat-square&label=) | State Management |
-| `@forgedevstack/forge-compass` | ![npm](https://img.shields.io/npm/v/@forgedevstack/forge-compass?style=flat-square&label=) | Routing |
-| `@forgedevstack/forge-form` | ![npm](https://img.shields.io/npm/v/@forgedevstack/forge-form?style=flat-square&label=) | Form Management |
-| `@forgedevstack/forge-query` | ![npm](https://img.shields.io/npm/v/@forgedevstack/forge-query?style=flat-square&label=) | Data Fetching |
-| `@forgedevstack/grid-table` | ![npm](https://img.shields.io/npm/v/@forgedevstack/grid-table?style=flat-square&label=) | Data Grid |
-| `@forgedevstack/relay` | ![npm](https://img.shields.io/npm/v/@forgedevstack/relay?style=flat-square&label=) | HTTP Client & WebSockets |
-| `@forgedevstack/forge-auth` | ![npm](https://img.shields.io/npm/v/@forgedevstack/forge-auth?style=flat-square&label=) | Authentication & OAuth |
-| `@forgedevstack/crucible` | ![npm](https://img.shields.io/npm/v/@forgedevstack/crucible?style=flat-square&label=) | Testing Framework |
-| `@forgedevstack/anvil` | ![npm](https://img.shields.io/npm/v/@forgedevstack/anvil?style=flat-square&label=) | Utilities |
-| `@forgedevstack/harbor` | ![npm](https://img.shields.io/npm/v/@forgedevstack/harbor?style=flat-square&label=) | Backend Framework |
+| Package | Version | Description | Replaces |
+|---------|---------|-------------|----------|
+| `@forgedevstack/bear` | `^1.2.2` | UI Component Library | — |
+| `@forgedevstack/aerocraft` | `^1.0.4` | CSS Utility Framework | Tailwind |
+| `@forgedevstack/synapse` | `^1.0.2` | State Management | Redux, Zustand |
+| `@forgedevstack/forge-compass` | `^1.0.2` | Routing | React Router |
+| `@forgedevstack/forge-form` | `^1.0.0` | Form Management | Formik, React Hook Form |
+| `@forgedevstack/forge-query` | `^1.0.1` | Data Fetching | TanStack Query, SWR |
+| `@forgedevstack/grid-table` | `^1.0.8` | Data Grid | AG Grid, TanStack Table |
+| `@forgedevstack/relay` | `^1.0.0` | HTTP Client & WebSockets | Axios |
+| `@forgedevstack/forge-auth` | `^1.0.0` | Authentication & OAuth | — |
+| `@forgedevstack/lingo` | `^1.0.0` | Translation & Localization | i18next, react-intl |
+| `@forgedevstack/rail` | `^1.0.0` | Carousel & Slider | Swiper, Embla |
+| `@forgedevstack/torch` | `^1.0.0` | Media Player | Video.js, Plyr |
+| `@forgedevstack/kiln` | `^1.0.5` | Component Docs & Showcase | Storybook |
+| `@forgedevstack/crucible` | `^1.0.0` | Testing Framework | Jest, Vitest |
+| `@forgedevstack/anvil` | `^1.0.6` | Utilities & Hooks | Lodash |
+| `@forgedevstack/harbor` | `^1.6.2` | Backend Framework | Express (raw) |
 
 ## Documentation
 
 - [ForgeStack](https://forgedevstack.com)
+- [AeroCraft](https://forgedevstack.com/aerocraft)
 - [Bear UI](https://forgedevstack.com/bear)
 - [Synapse](https://forgedevstack.com/synapse)
 - [Forge Compass](https://forgedevstack.com/compass)
 - [Grid Table](https://forgedevstack.com/table)
 - [Relay](https://forgedevstack.com/relay)
 - [Forge Auth](https://forgedevstack.com/auth)
+- [Lingo](https://forgedevstack.com/lingo)
+- [Rail](https://forgedevstack.com/rail)
+- [Torch](https://forgedevstack.com/torch)
+- [Kiln](https://forgedevstack.com/kiln)
 - [Crucible](https://forgedevstack.com/crucible)
 - [Anvil](https://forgedevstack.com/anvil)
 - [**Harbor**](https://forgedevstack.com/harbor)
